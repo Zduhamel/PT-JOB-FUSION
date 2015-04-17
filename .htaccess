@@ -1,0 +1,26 @@
+# Use PHP5.4 as default
+AddHandler application/x-httpd-php54 .php
+
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress
+
+SetEnvIfNoCase Request_URI \.(?:ogv|ogg|oga|m4v|mp4|m4a|mp3|wav|webma?|webmv)$ no-gzip dont-vary  
+  
+AddType video/ogg .ogv  
+AddType video/mp4 .m4v .mp4  
+AddType video/webm .webm .webmv  
+  
+AddType audio/mpeg .mp3  
+AddType audio/mp4 .m4a  
+AddType audio/ogg .ogg .oga  
+AddType audio/webm .webma  
+AddType audio/wav .wav  
