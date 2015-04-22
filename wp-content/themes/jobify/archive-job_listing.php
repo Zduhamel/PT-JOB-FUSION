@@ -13,6 +13,7 @@ get_header(); ?>
 	</header>
 
 	<div id="primary" class="content-area">
+					<?php do_action( 'jobify_output_map' ); ?>
 		<div id="content" class="container" role="main">
 			<div class="entry-content">
 				<?php do_action( 'jobify_output_job_results' ); ?>
