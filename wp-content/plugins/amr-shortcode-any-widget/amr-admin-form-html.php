@@ -90,14 +90,14 @@ if (!class_exists('amr_saw_plugin_admin')) {
 			echo '</li>';
 			echo '<li>';
 			echo '<a title="Create a page" href="'
-			.add_query_arg('content','[do_widget Archives widget_classes=none]', get_admin_url('','post-new.php?post_type=page'))
+			.get_admin_url('','post-new.php?post_type=page&content=&#91;do_widget Archives widget_classes=none&#93;')
 			.'"> ';
 			_e('Create a page with do_widget shortcode and remove widget_classes', 'amr-shortcode-any-widget'); 
 			echo '</a>';
 			echo '</li>';
 			echo '<li>';
 			echo '<a title="Create a page" href="'
-			.add_query_arg('content','[do_widget Archives]', get_admin_url('','post-new.php?post_type=page'))
+			.get_admin_url('','post-new.php?post_type=page&content=&#91;do_widget Archives &#93;')
 			.'"> ';
 			_e('Create a page with do_widget shortcode', 'amr-shortcode-any-widget'); 
 			echo '</a>';
@@ -151,14 +151,15 @@ if (!class_exists('amr_saw_plugin_admin')) {
 			echo '<ul>';
 			echo '<li>';
 			echo '<a title="Create a page" href="'
-			.add_query_arg('content','[do_widget_area]', get_admin_url('','post-new.php?post_type=page'))
+			.get_admin_url('','post-new.php?post_type=page&content=&#91;do_widget_area&#93;')
 			.'"> ';
 			_e('Create a page with do_widget_area shortcode without the widget_area class', 'amr-shortcode-any-widget'); 
 			echo '</a> Hoping to avoid theme styling.';
 			echo '</li>';
 			echo '<li>';
 			echo '<a title="Create a page" href="'
-			.add_query_arg('content','[do_widget_area widget_area_class=none]', get_admin_url('','post-new.php?post_type=page'))
+			.get_admin_url('',
+			'post-new.php?post_type=page&content=&#91;do_widget_area widget_area_class=none&#93;')
 			.'"> ';
 			_e('Create a page with do_widget_area shortcode', 'amr-shortcode-any-widget'); 
 			echo '</a> Hoping to use theme styling.';

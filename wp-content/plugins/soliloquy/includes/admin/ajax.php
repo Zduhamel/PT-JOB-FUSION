@@ -1006,6 +1006,7 @@ function soliloquy_ajax_install_addon() {
             ),
             admin_url( 'admin.php' )
         );
+        $url = esc_url( $url );
 
         // Start output bufferring to catch the filesystem form if credentials are needed.
         ob_start();

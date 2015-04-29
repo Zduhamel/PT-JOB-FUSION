@@ -130,7 +130,7 @@ class Soliloquy_Shortcode {
         // Register the main slider style.
         $this->stylesheets[] = array(
             'id'    => 'soliloquy-style-css',
-            'href'  => add_query_arg( 'ver', $this->base->version, plugins_url( 'assets/css/soliloquy.css', $this->base->file ) ),
+            'href'  => esc_url( add_query_arg( 'ver', $this->base->version, plugins_url( 'assets/css/soliloquy.css', $this->base->file ) ) ),
         );
          
         // Register main slider script.
@@ -379,7 +379,7 @@ class Soliloquy_Shortcode {
         // If we have a caption, output the caption.
         if ( ! empty( $item['caption'] ) ) {
             $output  = apply_filters( 'soliloquy_output_before_caption', $output, $id, $item, $data, $i );
-            $output .= '<div class="soliloquy-caption' . ( $this->get_config( 'mobile_caption', $data ) ? ' soliloquy-caption-mobile' : '') . '"><div class="soliloquy-caption-inside">';
+            $output .= '<div class="soliloquy-caption soliloquy-caption-' . $this->get_config( 'caption_position', $data ) . ( $this->get_config( 'mobile_caption', $data ) ? ' soliloquy-caption-mobile' : '') . '"><div class="soliloquy-caption-inside">';
                 $caption = apply_filters( 'soliloquy_output_caption', $item['caption'], $id, $item, $data, $i );
                 $output .= do_shortcode( $caption );
             $output .= '</div></div>';
@@ -439,7 +439,7 @@ class Soliloquy_Shortcode {
         // If we have a caption, output the caption.
         if ( ! empty( $item['caption'] ) ) {
             $output  = apply_filters( 'soliloquy_output_before_caption', $output, $id, $item, $data, $i );
-            $output .= '<div class="soliloquy-caption"' . ( $this->get_config( 'mobile_caption', $data ) ? ' soliloquy-caption-mobile' : '') . '><div class="soliloquy-caption-inside">';
+            $output .= '<div class="soliloquy-caption soliloquy-caption-' . $this->get_config( 'caption_position', $data ) . ( $this->get_config( 'mobile_caption', $data ) ? ' soliloquy-caption-mobile' : '') . '"><div class="soliloquy-caption-inside">';
                 $caption = apply_filters( 'soliloquy_output_caption', $item['caption'], $id, $item, $data, $i );
                 $output .= do_shortcode( $caption );
             $output .= '</div></div>';
@@ -524,13 +524,13 @@ class Soliloquy_Shortcode {
                 break;
             case 'url' :
                 if ( 'youtube' == $source ) {
-                    $ret = add_query_arg( $this->get_youtube_args( $data ), '//youtube.com/embed/' . $y_matches[0] );
+                    $ret = esc_url( add_query_arg( $this->get_youtube_args( $data ), '//youtube.com/embed/' . $y_matches[0] ) );
                 } else if ( 'vimeo' == $source ) {
-                    $ret = add_query_arg( $this->get_vimeo_args( $data ), '//player.vimeo.com/video/' . $v_matches[1] );
+                    $ret = esc_url( add_query_arg( $this->get_vimeo_args( $data ), '//player.vimeo.com/video/' . $v_matches[1] ) );
                 } else if ( 'wistia' == $source ) {
                     $parts = explode( '/', $w_matches[0] );
                     $id    = array_pop( $parts );
-                    $ret   = add_query_arg( $this->get_wistia_args( $data ), '//fast.wistia.net/embed/iframe/' . $id );
+                    $ret   = esc_url( add_query_arg( $this->get_wistia_args( $data ), '//fast.wistia.net/embed/iframe/' . $id ) );
                 } else {
                     $ret = apply_filters( 'soliloquy_video_url', false, $source, $id, $item, $data );
                 }
@@ -642,8 +642,10 @@ class Soliloquy_Shortcode {
 
                     <?php do_action( 'soliloquy_api_preload', $data ); ?>
 
+                    
+                    <?php 
                     // Process video handlers.
-                    <?php if ( ! empty( $data['youtube'] ) ) : ?>
+                    if ( ! empty( $data['youtube'] ) ) : ?>
                     soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-video-youtube').each(function(){
                         if ( ! $(this).attr('src') ) {
                             $(this).css('height', Math.round($('#soliloquy-container-<?php echo $data['id']; ?>').width()/(<?php echo $this->get_config( 'slider_width', $data ); ?>/<?php echo $this->get_config( 'slider_height', $data ); ?>)));
@@ -656,8 +658,6 @@ class Soliloquy_Shortcode {
                             hold   = $this.data('soliloquy-video-holder') + '-holder',
                             width  = $('#soliloquy-container-<?php echo $data['id']; ?>').width(),
                             height = $('#soliloquy-container-<?php echo $data['id']; ?>').height();
-
-                        // Load the video.
                         soliloquyYouTubeVids(<?php echo json_encode( $this->get_youtube_args( $data ) ); ?>, id, width, height, hold, jQuery);
                     });
                     <?php endif; ?>
@@ -675,8 +675,6 @@ class Soliloquy_Shortcode {
                             hold   = $this.data('soliloquy-video-holder') + '-holder',
                             width  = $('#soliloquy-container-<?php echo $data['id']; ?>').width(),
                             height = $('#soliloquy-container-<?php echo $data['id']; ?>').height();
-
-                        // Load the video.
                         soliloquyVimeoVids(<?php echo json_encode( $this->get_vimeo_args( $data ) ); ?>, id, width, height, hold, jQuery);
                     });
                     <?php endif; ?>
@@ -694,8 +692,6 @@ class Soliloquy_Shortcode {
                             hold   = $this.data('soliloquy-video-holder') + '-holder',
                             width  = $('#soliloquy-container-<?php echo $data['id']; ?>').width(),
                             height = $('#soliloquy-container-<?php echo $data['id']; ?>').height();
-
-                        // Load the video.
                         soliloquyWistiaVids(<?php echo json_encode( $this->get_wistia_args( $data ) ); ?>, id, width, height, hold, jQuery);
                     });
                     <?php endif; ?>
@@ -760,15 +756,12 @@ class Soliloquy_Shortcode {
                                 soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-controls').addClass('soliloquy-hide');
                             }
                             soliloquy_<?php echo $data['id']; ?>.find('.soliloquy-item:not(.soliloquy-clone):eq(' + currentIndex + ')').addClass('soliloquy-active-slide').attr('aria-hidden','false');
-                            // Purge all cloned items of IDs to avoid duplicate ID issues.
                             soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-clone').find('*').removeAttr('id');
 
-                            // Add ARIA
                             soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-controls-direction').attr('aria-label','carousel buttons').attr('aria-controls', '<?php echo 'soliloquy-container-' . $data['id']; ?>');
                             soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-controls-direction a.soliloquy-prev').attr('aria-label','previous');
                             soliloquy_container_<?php echo $data['id']; ?>.find('.soliloquy-controls-direction a.soliloquy-next').attr('aria-label','next');
                           
-                            // Force a resize event to ensure all slides are calculated properly.
                             $(window).trigger('resize');
                             <?php do_action( 'soliloquy_api_on_load', $data ); ?>
                         },
@@ -808,8 +801,9 @@ class Soliloquy_Shortcode {
 
                     <?php do_action( 'soliloquy_api_slider', $data ); ?>
 
+                    <?php 
                     // Process HTML slide helpers if we have HTML slides.
-                    <?php if ( $this->html ) : ?>
+                    if ( $this->html ) : ?>
                     $(window).on({
                         'resize' : function(){
                             var soliloquy_html_slides = soliloquy_<?php echo $data['id']; ?>.find('.soliloquy-html-sentinel');
@@ -823,8 +817,10 @@ class Soliloquy_Shortcode {
                     <?php do_action( 'soliloquy_api_end', $data ); ?>
                 });
 
+            
+            <?php 
             // Minify before outputting to improve page load time.
-            <?php do_action( 'soliloquy_api_end_global', $data ); echo $this->minify( ob_get_clean() ); ?></script>
+            do_action( 'soliloquy_api_end_global', $data ); echo $this->minify( ob_get_clean() ); ?></script>
             <?php
         }
 
@@ -863,7 +859,7 @@ class Soliloquy_Shortcode {
 
             $this->stylesheets[] = array(
                 'id'    => $this->base->plugin_slug . $theme . '-theme-style-css',
-                'href'  => add_query_arg( 'ver', $this->base->version, plugins_url( 'themes/' . $theme . '/style.css', $data['file'] ) ),
+                'href'  => esc_url( add_query_arg( 'ver', $this->base->version, plugins_url( 'themes/' . $theme . '/style.css', $data['file'] ) ) ),
             );
             
             break;
@@ -1389,10 +1385,24 @@ class Soliloquy_Shortcode {
      * @param string $string  String of data to minify.
      * @return string $string Minified string of data.
      */
-    public function minify( $string ) {
+    public function minify( $string, $stripDoubleForwardslashes = true ) {
+        
+        // Added a switch for stripping double forwardslashes
+        // This can be disabled when using URLs in JS, to ensure http:// doesn't get removed
+        // All other comment removal and minification will take place
 
-        $clean = preg_replace( '/((?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/', '', $string );
+        $stripDoubleForwardslashes = apply_filters( 'soliloquy_minify_strip_double_forward_slashes', $stripDoubleForwardslashes );
+        
+        if ( $stripDoubleForwardslashes ) {
+            $clean = preg_replace( '/((?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/', '', $string );
+        } else {
+            // Use less aggressive method
+            $clean = preg_replace( '!/\*.*?\*/!s', '', $string );
+            $clean = preg_replace( '/\n\s*\n/', "\n", $clean );
+        }
+        
         $clean = str_replace( array( "\r\n", "\r", "\t", "\n", '  ', '    ', '     ' ), '', $clean );
+
         return apply_filters( 'soliloquy_minified_string', $clean, $string );
 
     }

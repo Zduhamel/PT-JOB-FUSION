@@ -1,8 +1,8 @@
 === amr shortcode any widget ===
 Contributors: anmari
 Tags: shortcode, widget, page, templates, page template, widget_area, sidebar
-Tested up to: 4.0
-Version: 2.5
+Tested up to: 4.2
+Version: 2.6
 Stable tag: trunk
 
 == Description ==
@@ -191,6 +191,11 @@ More info on background: http://wordpress.org/support/topic/your-theme-your-side
 
 == Changelog ==
 = Version 2.5 =
+*  Tested on 4.2
+*  Removed from admin settings area the use of add_query_arg (unnecessary)
+*  Added esc_url to widget id 'debug' oage just in case (it is only accessed by logged in admin, but lets be safe and keep everyone happy if the see the add_query_arg and remove_query_arg
+
+= Version 2.5 =
 *  Tested on 4.1.1, Linked to the settings help page from the plugin action menu.
 *  Changed the readme a bit to try further aid understanding and reduce support issues
 *  Updated some screenshots.
@@ -242,16 +247,16 @@ More info on background: http://wordpress.org/support/topic/your-theme-your-side
 = Version 1.3 =
 *  Added debug link and retested. Added readme.
 
-= 1.12 =
+= 1.12 =
 *  Changed dummy shortcode sidebar so it appears after the theme sidebars to avoid taking over their widgets (this happened in numbered sidebars)  PLEASE note if you have upgraded,  you may appear to have "lost" your widgets due to this sidebar change.  You have not - they will be in your "inactive widgets" - please drag them to the new sidebar.  You may also find that you have 2 versions of the plugin, with slightly different folder names.  This will allow you to go back to the previous one to check what you had there if you need to.  Deactivate the old one and activate the new one.  Move your widgets back in.  Test then Delete the old one.    In one theme it also appeared that somehow due to this change, one of the sidebar widgets "moved" down to another sidebar.  I think that this may have had something to do with the fact that sidebars can be numbered or named, so please check all your sidebars before continuing.   As always make sure thath you know how to restore from a backup before doing any upgrades of any kind.
 *  Tested in 2.9.2, can still use either the widget name "Categories" or id=categories-6.  Note widget must have been created in the dummy shortcode sidebar.
 
-= 1.1 =
+= 1.1 =
 
 *  Allow for lowercase use of widget names for the those challenged by attention to detail!
 *  Cleaned up debug mode to make it easier for people to identify which instance of a widget they are using.  Add &do_widget_debug to url string.
 
-= 1.0 =
+= 1.0 =
 *  Launch of the plugin
 
 

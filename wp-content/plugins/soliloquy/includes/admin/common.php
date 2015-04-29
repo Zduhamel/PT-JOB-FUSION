@@ -81,7 +81,7 @@ class Soliloquy_Common_Admin {
 
         ?>
         <div class="error">
-            <p><?php printf( __( 'Soliloquy is now rocking v2! <strong>You need to upgrade your legacy v1 sliders and pre-official release v2 sliders to the official v2 slider architecture.</strong> <a href="%s">Click here to begin the upgrade process.</a>', 'soliloquy' ), add_query_arg( 'page', 'soliloquy-settings#!soliloquy-tab-upgrade', admin_url( 'edit.php?post_type=soliloquy' ) ) ); ?></p>
+            <p><?php printf( __( 'Soliloquy is now rocking v2! <strong>You need to upgrade your legacy v1 sliders and pre-official release v2 sliders to the official v2 slider architecture.</strong> <a href="%s">Click here to begin the upgrade process.</a>', 'soliloquy' ), esc_url( add_query_arg( 'page', 'soliloquy-settings#!soliloquy-tab-upgrade', admin_url( 'edit.php?post_type=soliloquy' ) ) ) ); ?></p>
         </div>
         <?php
 

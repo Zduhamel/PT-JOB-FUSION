@@ -89,10 +89,10 @@ class Soliloquy_Metaboxes {
         // If WordPress version < 4.0, add attachment-details-modal-support.css
         // This contains the 4.0 CSS to make the attachment window display correctly
         $version = (float) get_bloginfo( 'version' );
-		if ( $version < 4 ) {
-			wp_register_style( $this->base->plugin_slug . '-attachment-details-modal-support', plugins_url( 'assets/css/attachment-details-modal-support.css', $this->base->file ), array(), $this->base->version );
-			wp_enqueue_style( $this->base->plugin_slug . '-attachment-details-modal-support' );
-		}
+        if ( $version < 4 ) {
+            wp_register_style( $this->base->plugin_slug . '-attachment-details-modal-support', plugins_url( 'assets/css/attachment-details-modal-support.css', $this->base->file ), array(), $this->base->version );
+            wp_enqueue_style( $this->base->plugin_slug . '-attachment-details-modal-support' );
+        }
 
         // Fire a hook to load in custom metabox styles.
         do_action( 'soliloquy_metabox_styles' );
@@ -205,40 +205,40 @@ class Soliloquy_Metaboxes {
     public function get_plupload_init( $post_id ) {
 
         // Prepare $_POST form variables and apply backwards compat filter.
-    	$post_params = array(
-    	    'post_id'  => $post_id,
-    	    '_wpnonce' => wp_create_nonce( 'media-form' ),
-    	    'type'     => '',
-    	    'tab'      => '',
-    	    'short'    => 3
-    	);
-    	$post_params = apply_filters( 'upload_post_params', $post_params );
+        $post_params = array(
+            'post_id'  => $post_id,
+            '_wpnonce' => wp_create_nonce( 'media-form' ),
+            'type'     => '',
+            'tab'      => '',
+            'short'    => 3
+        );
+        $post_params = apply_filters( 'upload_post_params', $post_params );
 
-    	// Prepare upload size parameters.
+        // Prepare upload size parameters.
         $max_upload_size = wp_max_upload_size();
 
         // Prepare the plupload init array.
         $plupload_init = array(
-        	'runtimes'            => 'html5,silverlight,flash,html4',
-        	'browse_button'       => 'soliloquy-plupload-browse-button',
-        	'container'           => 'soliloquy-plupload-upload-ui',
-        	'drop_element'        => 'soliloquy-drag-drop-area',
-        	'file_data_name'      => 'async-upload',
-        	'multiple_queues'     => true,
-        	'max_file_size'       => $max_upload_size . 'b',
-        	'url'                 => admin_url( 'async-upload.php' ),
-        	'flash_swf_url'       => includes_url( 'js/plupload/plupload.flash.swf' ),
-        	'silverlight_xap_url' => includes_url( 'js/plupload/plupload.silverlight.xap' ),
-        	'filters'             => array(
-        	    array(
-        	        'title'       => __( 'Allowed Files', 'soliloquy' ),
-        	        'extensions'  => '*'
+            'runtimes'            => 'html5,silverlight,flash,html4',
+            'browse_button'       => 'soliloquy-plupload-browse-button',
+            'container'           => 'soliloquy-plupload-upload-ui',
+            'drop_element'        => 'soliloquy-drag-drop-area',
+            'file_data_name'      => 'async-upload',
+            'multiple_queues'     => true,
+            'max_file_size'       => $max_upload_size . 'b',
+            'url'                 => admin_url( 'async-upload.php' ),
+            'flash_swf_url'       => includes_url( 'js/plupload/plupload.flash.swf' ),
+            'silverlight_xap_url' => includes_url( 'js/plupload/plupload.silverlight.xap' ),
+            'filters'             => array(
+                array(
+                    'title'       => __( 'Allowed Files', 'soliloquy' ),
+                    'extensions'  => '*'
                 ),
             ),
-        	'multipart'           => true,
-        	'urlstream_upload'    => true,
-        	'multipart_params'    => $post_params,
-        	'resize'              => false
+            'multipart'           => true,
+            'urlstream_upload'    => true,
+            'multipart_params'    => $post_params,
+            'resize'              => false
         );
 
         // If we are on a mobile device, disable multi selection.
@@ -498,7 +498,7 @@ class Soliloquy_Metaboxes {
      * @param object $post The current post object.
      */
     public function do_default_display( $post ) {
-	    
+        
         // Output the custom media upload form.
         Soliloquy_Media::get_instance()->media_upload_form();
 
@@ -677,37 +677,37 @@ class Soliloquy_Metaboxes {
             <div class="media-frame-content">
                 <div class="attachments-browser">
                     <div class="soliloquy-meta attachments soliloquy-ui-content">
-						<p class="no-margin-top"><a href="#" class="soliloquy-add-video-slide button button-large button-primary" data-soliloquy-video-number="1" title="<?php esc_attr_e( 'Add Video Slide', 'soliloquy' ); ?>"><?php _e( 'Add Video Slide', 'soliloquy' ); ?></a></p>
-					</div><!-- end .soliloquy-meta -->
-					<div class="media-sidebar">
-						<div class="soliloquy-meta-sidebar">
-							<h3><?php _e( 'Helpful Tips', 'soliloquy' ); ?></h3>
-							<strong>Creating Video Slides</strong>
-							<p><?php _e( 'Video links can be from either YouTube, Vimeo or Wistia. They <strong>must</strong> follow one of the formats listed below:', 'soliloquy' ) ?></p>
-							
-							<div class="soliloquy-accepted-urls">								
-								<span><strong><?php _e( 'YouTube URLs', 'soliloquy' ); ?></strong></span>
-								<span>youtube.com/v/{vidid}</span>
-								<span>youtube.com/vi/{vidid}</span>
-								<span>youtube.com/?v={vidid}</span>
-								<span>youtube.com/?vi={vidid}</span>
-								<span>youtube.com/watch?v={vidid}</span>
-								<span>youtube.com/watch?vi={vidid}</span>
-								<span>youtu.be/{vidid}</span><br />
-							
-								<span><strong><?php _e( 'Vimeo URLs', 'soliloquy' ); ?></strong></span>
-								<span>vimeo.com/{vidid}</span>
-								<span>vimeo.com/groups/tvc/videos/{vidid}</span>
-								<span>player.vimeo.com/video/{vidid}</span><br />
-							
-								<span><strong><?php _e( 'Wistia URLs', 'soliloquy' ); ?></strong></span>
-								<span>*wistia.com/medias/*</span>
-								<span>*wistia.com/embed/*</span>
-								<span>*wi.st/medias/*</span>
-								<span>*wi.st/embed/*</span>
-							</div>
-						</div><!-- end .soliloquy-meta-sidebar -->
-					</div><!-- end .media-sidebar -->
+                        <p class="no-margin-top"><a href="#" class="soliloquy-add-video-slide button button-large button-primary" data-soliloquy-video-number="1" title="<?php esc_attr_e( 'Add Video Slide', 'soliloquy' ); ?>"><?php _e( 'Add Video Slide', 'soliloquy' ); ?></a></p>
+                    </div><!-- end .soliloquy-meta -->
+                    <div class="media-sidebar">
+                        <div class="soliloquy-meta-sidebar">
+                            <h3><?php _e( 'Helpful Tips', 'soliloquy' ); ?></h3>
+                            <strong>Creating Video Slides</strong>
+                            <p><?php _e( 'Video links can be from either YouTube, Vimeo or Wistia. They <strong>must</strong> follow one of the formats listed below:', 'soliloquy' ) ?></p>
+                            
+                            <div class="soliloquy-accepted-urls">                               
+                                <span><strong><?php _e( 'YouTube URLs', 'soliloquy' ); ?></strong></span>
+                                <span>youtube.com/v/{vidid}</span>
+                                <span>youtube.com/vi/{vidid}</span>
+                                <span>youtube.com/?v={vidid}</span>
+                                <span>youtube.com/?vi={vidid}</span>
+                                <span>youtube.com/watch?v={vidid}</span>
+                                <span>youtube.com/watch?vi={vidid}</span>
+                                <span>youtu.be/{vidid}</span><br />
+                            
+                                <span><strong><?php _e( 'Vimeo URLs', 'soliloquy' ); ?></strong></span>
+                                <span>vimeo.com/{vidid}</span>
+                                <span>vimeo.com/groups/tvc/videos/{vidid}</span>
+                                <span>player.vimeo.com/video/{vidid}</span><br />
+                            
+                                <span><strong><?php _e( 'Wistia URLs', 'soliloquy' ); ?></strong></span>
+                                <span>*wistia.com/medias/*</span>
+                                <span>*wistia.com/embed/*</span>
+                                <span>*wi.st/medias/*</span>
+                                <span>*wi.st/embed/*</span>
+                            </div>
+                        </div><!-- end .soliloquy-meta-sidebar -->
+                    </div><!-- end .media-sidebar -->
                 </div><!-- end .attachments-browser -->
             </div><!-- end .media-frame-content -->
         </div><!-- end #soliloquy-image-slides -->
@@ -729,15 +729,15 @@ class Soliloquy_Metaboxes {
             <div class="media-frame-content">
                 <div class="attachments-browser">
                     <div class="soliloquy-meta attachments soliloquy-ui-content">
-						<p class="no-margin-top"><a href="#" class="soliloquy-add-html-slide button button-large button-primary" data-soliloquy-html-number="1" title="<?php esc_attr_e( 'Add HTML Slide', 'soliloquy' ); ?>"><?php _e( 'Add HTML Slide', 'soliloquy' ); ?></a></p>
-					</div><!-- end .soliloquy-meta -->
-					<div class="media-sidebar">
-						<div class="soliloquy-meta-sidebar">
-							<h3><?php _e( 'Helpful Tips', 'soliloquy' ); ?></h3>
-							<strong><?php _e( 'Creating HTML Slides', 'soliloquy' ) ?></strong>
-							<p><?php _e( 'Each HTML slide should have its own unique name (for identification purposes) and code for outputting into the slider. The code will be inserted inside of the slide <code>&lt;li&gt;</code> tag and can be styled with custom CSS as you need.', 'soliloquy' ); ?></p>
-						</div><!-- end .soliloquy-meta-sidebar -->
-					</div><!-- end .media-sidebar -->
+                        <p class="no-margin-top"><a href="#" class="soliloquy-add-html-slide button button-large button-primary" data-soliloquy-html-number="1" title="<?php esc_attr_e( 'Add HTML Slide', 'soliloquy' ); ?>"><?php _e( 'Add HTML Slide', 'soliloquy' ); ?></a></p>
+                    </div><!-- end .soliloquy-meta -->
+                    <div class="media-sidebar">
+                        <div class="soliloquy-meta-sidebar">
+                            <h3><?php _e( 'Helpful Tips', 'soliloquy' ); ?></h3>
+                            <strong><?php _e( 'Creating HTML Slides', 'soliloquy' ) ?></strong>
+                            <p><?php _e( 'Each HTML slide should have its own unique name (for identification purposes) and code for outputting into the slider. The code will be inserted inside of the slide <code>&lt;li&gt;</code> tag and can be styled with custom CSS as you need.', 'soliloquy' ); ?></p>
+                        </div><!-- end .soliloquy-meta-sidebar -->
+                    </div><!-- end .media-sidebar -->
                 </div><!-- end .attachments-browser -->
             </div><!-- end .media-frame-content -->
         </div><!-- end #soliloquy-image-slides -->
@@ -837,6 +837,19 @@ class Soliloquy_Metaboxes {
                         <td>
                             <input id="soliloquy-config-gutter" type="number" name="_soliloquy[gutter]" value="<?php echo absint( $this->get_config( 'gutter', $this->get_config_default( 'gutter' ) ) ); ?>" /> <span class="soliloquy-unit"><?php _e( 'px', 'soliloquy' ); ?></span>
                             <p class="description"><?php _e( 'Sets the gutter between the slider and your content based on slider position.', 'soliloquy' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr id="soliloquy-config-caption-position-box">
+                        <th scope="row">
+                            <label for="soliloquy-config-position-delay"><?php _e( 'Caption Position', 'soliloquy' ); ?></label>
+                        </th>
+                        <td>
+                            <select id="soliloquy-caption-position" name="_soliloquy[caption_position]">
+                                <?php foreach ( (array) $this->get_caption_positions() as $i => $data ) : ?>
+                                    <option value="<?php echo $data['value']; ?>"<?php selected( $data['value'], $this->get_config( 'caption_position', $this->get_config_default( 'caption_position' ) ) ); ?>><?php echo $data['name']; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description"><?php _e( 'The position of the caption for each slide, if specified.', 'soliloquy' ); ?></p>
                         </td>
                     </tr>
                     <tr id="soliloquy-config-caption-delay-box">
@@ -1093,7 +1106,10 @@ class Soliloquy_Metaboxes {
                         </th>
                         <td>
                             <form></form>
-                            <?php $import_url = 'auto-draft' == $post->post_status ? add_query_arg( array( 'post' => $post->ID, 'action' => 'edit', 'soliloquy-imported' => true ), admin_url( 'post.php' ) ) : add_query_arg( 'soliloquy-imported', true ); ?>
+                            <?php 
+                            $import_url = 'auto-draft' == $post->post_status ? add_query_arg( array( 'post' => $post->ID, 'action' => 'edit', 'soliloquy-imported' => true ), admin_url( 'post.php' ) ) : add_query_arg( 'soliloquy-imported', true ); 
+                            $import_url = esc_url( $import_url );
+                            ?>
                             <form action="<?php echo $import_url; ?>" id="soliloquy-config-import-slider-form" class="soliloquy-import-form" method="post" enctype="multipart/form-data">
                                 <input id="soliloquy-config-import-slider" type="file" name="soliloquy_import_slider" />
                                 <input type="hidden" name="soliloquy_import" value="1" />
@@ -1191,6 +1207,7 @@ class Soliloquy_Metaboxes {
         $settings['config']['transition']    = esc_attr( $_POST['_soliloquy']['transition'] );
         $settings['config']['duration']      = absint( $_POST['_soliloquy']['duration'] );
         $settings['config']['speed']         = absint( $_POST['_soliloquy']['speed'] );
+        $settings['config']['caption_position'] = esc_attr( $_POST['_soliloquy']['caption_position'] );
         $settings['config']['caption_delay'] = absint( $_POST['_soliloquy']['caption_delay'] );
         $settings['config']['gutter']        = absint( $_POST['_soliloquy']['gutter'] );
         $settings['config']['auto']          = isset( $_POST['_soliloquy']['auto'] ) ? 1 : 0;
@@ -1217,7 +1234,7 @@ class Soliloquy_Metaboxes {
         $settings['config']['classes']       = explode( "\n", $_POST['_soliloquy']['classes'] );
         $settings['config']['title']         = trim( strip_tags( $_POST['_soliloquy']['title'] ) );
         $settings['config']['slug']          = sanitize_text_field( $_POST['_soliloquy']['slug'] );
-		$settings['config']['rtl']           = ( isset( $_POST['_soliloquy']['rtl'] ) ? 1 : 0 );
+        $settings['config']['rtl']           = ( isset( $_POST['_soliloquy']['rtl'] ) ? 1 : 0 );
 
         // If on an soliloquy post type, map the title and slug of the post object to the custom fields if no value exists yet.
         if ( isset( $post->post_type ) && 'soliloquy' == $post->post_type ) {
@@ -1231,15 +1248,15 @@ class Soliloquy_Metaboxes {
         }
         
         // Get publish/draft status from Post
-		$settings['status'] = $post->post_status;
-		
+        $settings['status'] = $post->post_status;
+        
         // Provide a filter to override settings.
         $settings = apply_filters( 'soliloquy_save_settings', $settings, $post_id, $post );
 
         // Update the post meta.
         update_post_meta( $post_id, '_sol_slider_data', $settings );
 
-		// If the post has just been published for the first time
+        // If the post has just been published for the first time
         // 1. set meta field for the slider meta overlay helper.
         // 2. mark all slides as published
         if ( isset( $post->post_date ) && isset( $post->post_modified ) && $post->post_date === $post->post_modified ) {
@@ -1349,28 +1366,28 @@ class Soliloquy_Metaboxes {
      * @return string The  HTML output for the slider item.
      */
     public function get_slider_video( $id, $data, $post_id = 0 ) {
-	    
-		ob_start(); ?>
+        
+        ob_start(); ?>
         <li id="<?php echo $id; ?>" class="soliloquy-slide soliloquy-video soliloquy-status-<?php echo $data['status']; ?>" data-soliloquy-slide="<?php echo $id; ?>">
             <span class="overlay"><?php _e( 'Video', 'soliloquy' ); ?></span>
             <div class="soliloquy-video-wrap">
-				<div class="soliloquy-video-inside">
-					<div class="soliloquy-video-table">
-						<?php
-			            // If thumbnail exists, display it
-			            if ( isset( $data['src'] ) AND !empty( $data['src']) ) {
-				            ?>
-				            <img src="<?php echo esc_url( $data['src'] ); ?>" />
-				            <?php
-			            } else {
-				            ?>
-				            <h4 class="no-margin"><?php echo $data['title']; ?></h4>
-							<?php
-			            }
-			            ?>
-					</div>
-				</div>
-			</div>
+                <div class="soliloquy-video-inside">
+                    <div class="soliloquy-video-table">
+                        <?php
+                        // If thumbnail exists, display it
+                        if ( isset( $data['src'] ) AND !empty( $data['src']) ) {
+                            ?>
+                            <img src="<?php echo esc_url( $data['src'] ); ?>" />
+                            <?php
+                        } else {
+                            ?>
+                            <h4 class="no-margin"><?php echo $data['title']; ?></h4>
+                            <?php
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
             
             <a href="#" class="soliloquy-remove-slide" title="<?php esc_attr_e( 'Remove Video Slide from Slider?', 'soliloquy' ); ?>"></a>
             <a href="#" class="soliloquy-modify-slide" title="<?php esc_attr_e( 'Modify Video Slide', 'soliloquy' ); ?>"></a>
@@ -1396,15 +1413,15 @@ class Soliloquy_Metaboxes {
 
         ob_start(); ?>
         <li id="<?php echo $id; ?>" class="soliloquy-slide soliloquy-html soliloquy-status-<?php echo $data['status']; ?>" data-soliloquy-slide="<?php echo $id; ?>">
-           	<span class="overlay"><?php _e( 'HTML', 'soliloquy' ); ?></span>
+            <span class="overlay"><?php _e( 'HTML', 'soliloquy' ); ?></span>
             <div class="soliloquy-html-wrap">
-				<div class="soliloquy-html-inside">
-					<div class="soliloquy-html-table">
-						<h4 class="no-margin"><?php echo $data['title']; ?></h4>
-					</div>
-				</div>
+                <div class="soliloquy-html-inside">
+                    <div class="soliloquy-html-table">
+                        <h4 class="no-margin"><?php echo $data['title']; ?></h4>
+                    </div>
+                </div>
             </div>
-				
+                
             <a href="#" class="soliloquy-remove-slide" title="<?php esc_attr_e( 'Remove HTML Slide from Slider?', 'soliloquy' ); ?>"></a>
             <a href="#" class="soliloquy-modify-slide" title="<?php esc_attr_e( 'Modify HTML Slide', 'soliloquy' ); ?>"></a>
             
@@ -1436,157 +1453,157 @@ class Soliloquy_Metaboxes {
                 
                 
                 <div class="media-modal-content">
-	                 <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
-	                    
-	                    <!-- Back / Next Buttons -->
-	                    <div class="edit-media-header">
-		                    <button class="left dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
-		                    </button>
-		                    <button class="right dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
-		                    </button>
-	                    </div>
-	                    
-	                    <!-- Title -->
+                     <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
+                        
+                        <!-- Back / Next Buttons -->
+                        <div class="edit-media-header">
+                            <button class="left dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
+                            </button>
+                            <button class="right dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
+                            </button>
+                        </div>
+                        
+                        <!-- Title -->
                         <div class="media-frame-title">
                             <h1><?php _e( 'Edit Metadata', 'soliloquy' ); ?></h1>
                         </div>
                         
                         <!-- Content -->
                         <div class="media-frame-content" id="soliloquy-meta-table-<?php echo $id; ?>">
-	                        <div tabindex="0" role="checkbox" class="attachment-details save-ready">
-		                        <!-- Left -->
-		                        <div class="attachment-media-view portrait">
-			                        <div class="thumbnail thumbnail-image">
-				                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
-				                        <img class="details-image" src="<?php echo $data['src']; ?>" draggable="false" />
-				                        <?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?> 
-			                        </div>
-			                    </div>
-			                    
-			                    <!-- Right -->
-		                        <div class="attachment-info">
-			                        <!-- Details -->
-			                        <div class="details">
-				                        <!-- Images + SEO -->
-				                        <div class="filename">
-											<strong><?php _e( 'Images and SEO', 'soliloquy' ); ?></strong>
-											<?php _e( 'Images are a small but important part of your overall SEO strategy. In order to get the most SEO benefits from your slider, it is recommended that you fill out each applicable field with SEO friendly information about the image.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Title -->
-				                        <div class="filename">
-											<strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
-											<?php _e( 'Sets the image title attribute for the image.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Alt Text -->
-				                        <div class="filename">
-											<strong><?php _e( 'Alt Text', 'soliloquy' ); ?></strong>
-											<?php _e( 'The image alt text is used for SEO, so make sure you complete this field!', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Hyperlink -->
-				                        <div class="filename">
-											<strong><?php _e( 'Hyperlink', 'soliloquy' ); ?></strong>
-											<?php _e( 'The image hyperlink field is used when you click on an image in the slider.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Caption -->
-				                        <div class="filename">
-											<strong><?php _e( 'Caption', 'soliloquy' ); ?></strong>
-											<?php _e( 'Captions can take any type of HTML content, such as <code>form</code>, <code>iframe</code> and <code>h1</code> tags.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-			                        </div>
-			                        
-			                        <?php do_action( 'soliloquy_before_image_meta_table', $id, $data, $post_id ); ?>
+                            <div tabindex="0" role="checkbox" class="attachment-details save-ready">
+                                <!-- Left -->
+                                <div class="attachment-media-view portrait">
+                                    <div class="thumbnail thumbnail-image">
+                                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
+                                        <img class="details-image" src="<?php echo $data['src']; ?>" draggable="false" />
+                                        <?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?> 
+                                    </div>
+                                </div>
+                                
+                                <!-- Right -->
+                                <div class="attachment-info">
+                                    <!-- Details -->
+                                    <div class="details">
+                                        <!-- Images + SEO -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Images and SEO', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Images are a small but important part of your overall SEO strategy. In order to get the most SEO benefits from your slider, it is recommended that you fill out each applicable field with SEO friendly information about the image.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Title -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Sets the image title attribute for the image.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Alt Text -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Alt Text', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'The image alt text is used for SEO, so make sure you complete this field!', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Hyperlink -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Hyperlink', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'The image hyperlink field is used when you click on an image in the slider.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Caption -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Caption', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Captions can take any type of HTML content, such as <code>form</code>, <code>iframe</code> and <code>h1</code> tags.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                    </div>
+                                    
+                                    <?php do_action( 'soliloquy_before_image_meta_table', $id, $data, $post_id ); ?>
                                     <!-- Settings -->
-			                        <div class="settings">
-                                    	<?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
-                                    	<?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
-                                    	
-                                    	<!-- Status -->
+                                    <div class="settings">
+                                        <?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
+                                        <?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
+                                        
+                                        <!-- Status -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
-											<select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
-												<option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
-												<option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
-											</select>
+                                            <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
+                                            <select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
+                                                <option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
+                                                <option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
+                                            </select>
                                         </label>
                                         
-                                    	<!-- Title -->
+                                        <!-- Title -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
-											<input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
+                                            <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
                                         </label>
                                         
                                         <!-- Alt Text -->
                                         <?php do_action( 'soliloquy_before_image_meta_alt', $id, $data, $post_id ); ?>
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Alt Text', 'soliloquy' ); ?></span>
-											<input id="soliloquy-alt-<?php echo $id; ?>" class="soliloquy-alt" type="text" name="_soliloquy[meta_alt]" value="<?php echo ( ! empty( $data['alt'] ) ? esc_attr( $data['alt'] ) : '' ); ?>" data-soliloquy-meta="alt" />
+                                            <span class="name"><?php _e( 'Alt Text', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-alt-<?php echo $id; ?>" class="soliloquy-alt" type="text" name="_soliloquy[meta_alt]" value="<?php echo ( ! empty( $data['alt'] ) ? esc_attr( $data['alt'] ) : '' ); ?>" data-soliloquy-meta="alt" />
                                         </label>
-	                                    
-	                                    <!-- Link -->
-	                                    <?php do_action( 'soliloquy_before_image_meta_link', $id, $data, $post_id ); ?>
-	                                    <label class="setting">
-	                                        <span class="name"><?php _e( 'Hyperlink', 'soliloquy' ); ?></span>
-											<input id="soliloquy-link-<?php echo $id; ?>" class="soliloquy-link" type="text" name="_soliloquy[meta_link]" value="<?php echo ( ! empty( $data['link'] ) ? esc_url( $data['link'] ) : '' ); ?>" data-soliloquy-meta="link" />
+                                        
+                                        <!-- Link -->
+                                        <?php do_action( 'soliloquy_before_image_meta_link', $id, $data, $post_id ); ?>
+                                        <label class="setting">
+                                            <span class="name"><?php _e( 'Hyperlink', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-link-<?php echo $id; ?>" class="soliloquy-link" type="text" name="_soliloquy[meta_link]" value="<?php echo ( ! empty( $data['link'] ) ? esc_url( $data['link'] ) : '' ); ?>" data-soliloquy-meta="link" />
                                         </label>
                                         
                                         <!-- Open Link in New Tab -->
                                         <?php do_action( 'soliloquy_before_image_meta_tab', $id, $data, $post_id ); ?>
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Open Link in New Tab? ', 'soliloquy' ); ?></span>
-											<input id="soliloquy-link-tab-<?php echo $id; ?>" class="soliloquy-tab" type="checkbox" name="_soliloquy[meta_tab]" value="<?php echo ( ! empty( $data['linktab'] ) && $data['linktab'] ? 1 : 0 ); ?>" <?php checked( ( ! empty( $data['linktab'] ) && $data['linktab'] ? 1 : 0 ), 1 ); ?> data-soliloquy-meta="linktab" />
+                                            <span class="name"><?php _e( 'Open Link in New Tab? ', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-link-tab-<?php echo $id; ?>" class="soliloquy-tab" type="checkbox" name="_soliloquy[meta_tab]" value="<?php echo ( ! empty( $data['linktab'] ) && $data['linktab'] ? 1 : 0 ); ?>" <?php checked( ( ! empty( $data['linktab'] ) && $data['linktab'] ? 1 : 0 ), 1 ); ?> data-soliloquy-meta="linktab" />
                                         </label>
-										
-										<!-- Caption -->
-										<?php do_action( 'soliloquy_before_image_meta_caption', $id, $data, $post_id ); ?>
+                                        
+                                        <!-- Caption -->
+                                        <?php do_action( 'soliloquy_before_image_meta_caption', $id, $data, $post_id ); ?>
                                         <div class="setting">
-	                                        <span class="name"><?php _e( 'Caption', 'soliloquy' ); ?></span>
-	                                        <?php 
-		                                    $caption = ( ! empty( $data['caption'] ) ? $data['caption'] : '' );
-		                                    wp_editor( $caption, 'soliloquy-caption-' . $id, array( 
-		                                    	'media_buttons' => false, 
-		                                    	'wpautop' 		=> false, 
-		                                    	'tinymce' 		=> false, 
-		                                    	'textarea_name' => '_soliloquy[meta_caption]', 
-		                                    	'quicktags' => array( 
-		                                    		'buttons' => 'strong,em,link,ul,ol,li,close' 
-		                                    	),
-		                                    ) ); 
-		                                    ?> 
+                                            <span class="name"><?php _e( 'Caption', 'soliloquy' ); ?></span>
+                                            <?php 
+                                            $caption = ( ! empty( $data['caption'] ) ? $data['caption'] : '' );
+                                            wp_editor( $caption, 'soliloquy-caption-' . $id, array( 
+                                                'media_buttons' => false, 
+                                                'wpautop'       => false, 
+                                                'tinymce'       => false, 
+                                                'textarea_name' => '_soliloquy[meta_caption]', 
+                                                'quicktags' => array( 
+                                                    'buttons' => 'strong,em,link,ul,ol,li,close' 
+                                                ),
+                                            ) ); 
+                                            ?> 
                                         </div>
-	                                    
+                                        
                                         <?php do_action( 'soliloquy_after_image_meta_settings', $id, $data, $post_id ); ?>
                                         <?php do_action( 'soliloquy_after_meta_settings', $id, $data, $post_id ); ?>
-			                        </div>
-			                        <!-- /.settings -->  
-			                        
+                                    </div>
+                                    <!-- /.settings -->  
+                                    
                                     <?php do_action( 'soliloquy_after_image_meta_table', $id, $data, $post_id ); ?>
                                     <?php do_action( 'soliloquy_after_meta_table', $id, $data, $post_id ); ?>
                                     
                                     <!-- Actions -->
-			                        <div class="actions">
-			                            <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
+                                    <div class="actions">
+                                        <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
                                 
-										<!-- Save Spinner -->
-				                        <span class="settings-save-status">
-					                        <span class="spinner"></span>
-					                        <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
-				                        </span>
+                                        <!-- Save Spinner -->
+                                        <span class="settings-save-status">
+                                            <span class="spinner"></span>
+                                            <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
+                                        </span>
                                     </div>
-			                        <!-- /.actions -->
-			                    
-			                    </div>
-	                        </div>
+                                    <!-- /.actions -->
+                                
+                                </div>
+                            </div>
                         </div>
                     </div><!-- end .media-frame -->
                 </div><!-- end .media-modal-content -->
@@ -1619,147 +1636,147 @@ class Soliloquy_Metaboxes {
                 <a class="media-modal-close" href="#"><span class="media-modal-icon"></span></a>
                 
                 <div class="media-modal-content">
-	                 <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
-	                    
-	                    <!-- Back / Next Buttons -->
-	                    <div class="edit-media-header">
-		                    <button class="left dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
-		                    </button>
-		                    <button class="right dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
-		                    </button>
-	                    </div>
-	                    
-	                    <!-- Title -->
+                     <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
+                        
+                        <!-- Back / Next Buttons -->
+                        <div class="edit-media-header">
+                            <button class="left dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
+                            </button>
+                            <button class="right dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
+                            </button>
+                        </div>
+                        
+                        <!-- Title -->
                         <div class="media-frame-title">
                             <h1><?php _e( 'Edit Metadata', 'soliloquy' ); ?></h1>
                         </div>
                         
                         <!-- Content -->
                         <div class="media-frame-content" id="soliloquy-meta-table-<?php echo $id; ?>">
-	                        <div tabindex="0" role="checkbox" class="attachment-details save-ready">
-		                        <!-- Left -->
-		                        <div class="attachment-media-view portrait">
-			                        <div class="thumbnail thumbnail-image">
-				                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
-				                        <img class="details-image src" src="<?php echo $data['src']; ?>" draggable="false" />
-				                        
-				                        <!-- Choose Video Placeholder Image + Remove Video Placeholder Image -->
-				                        <a href="#" class="soliloquy-thumbnail button button-primary" data-field="soliloquy-src" title="<?php _e( 'Choose Video Placeholder Image', 'soliloquy' ); ?>"><?php _e( 'Choose Video Placeholder Image', 'soliloquy' ); ?></a>
-										<a href="#" class="soliloquy-thumbnail-delete button button-secondary" data-field="soliloquy-src" title="<?php _e( 'Remove Video Placeholder Image', 'soliloquy' ); ?>"><?php _e( 'Remove Video Placeholder Image', 'soliloquy' ); ?></a>
-										<?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?> 
-                                	</div>
-			                    </div>
-			                    
-			                    <!-- Right -->
-		                        <div class="attachment-info">
-			                        <!-- Details -->
-			                        <div class="details">
-				                        <!-- Title -->
-				                        <div class="filename">
-											<strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
-											<?php _e( 'The title can take any type of HTML. You can adjust the position of the titles in the main Lightbox settings.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- URL -->
-				                        <div class="filename">
-											<strong><?php _e( 'URL', 'soliloquy' ); ?></strong>
-											<?php _e( 'The URL of the YouTube / Vimeo video.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Placeholder -->
-				                        <div class="filename">
-											<strong><?php _e( 'Placeholder', 'soliloquy' ); ?></strong>
-											<?php _e( 'Either choose a video placeholder image, or let Soliloquy automatically fetch one from the video source.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-				                        <!-- Caption -->
-				                        <div class="filename">
-											<strong><?php _e( 'Caption', 'soliloquy' ); ?></strong>
-											<?php _e( 'Captions can take any type of HTML content, such as <code>form</code>, <code>iframe</code> and <code>h1</code> tags.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-			                        </div>
-			                        
-			                        <?php do_action( 'soliloquy_before_video_meta_table', $id, $data, $post_id ); ?>
+                            <div tabindex="0" role="checkbox" class="attachment-details save-ready">
+                                <!-- Left -->
+                                <div class="attachment-media-view portrait">
+                                    <div class="thumbnail thumbnail-image">
+                                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
+                                        <img class="details-image src" src="<?php echo $data['src']; ?>" draggable="false" />
+                                        
+                                        <!-- Choose Video Placeholder Image + Remove Video Placeholder Image -->
+                                        <a href="#" class="soliloquy-thumbnail button button-primary" data-field="soliloquy-src" title="<?php _e( 'Choose Video Placeholder Image', 'soliloquy' ); ?>"><?php _e( 'Choose Video Placeholder Image', 'soliloquy' ); ?></a>
+                                        <a href="#" class="soliloquy-thumbnail-delete button button-secondary" data-field="soliloquy-src" title="<?php _e( 'Remove Video Placeholder Image', 'soliloquy' ); ?>"><?php _e( 'Remove Video Placeholder Image', 'soliloquy' ); ?></a>
+                                        <?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?> 
+                                    </div>
+                                </div>
+                                
+                                <!-- Right -->
+                                <div class="attachment-info">
+                                    <!-- Details -->
+                                    <div class="details">
+                                        <!-- Title -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'The title can take any type of HTML. You can adjust the position of the titles in the main Lightbox settings.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- URL -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'URL', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'The URL of the YouTube / Vimeo video.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Placeholder -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Placeholder', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Either choose a video placeholder image, or let Soliloquy automatically fetch one from the video source.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Caption -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Caption', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Captions can take any type of HTML content, such as <code>form</code>, <code>iframe</code> and <code>h1</code> tags.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                    </div>
+                                    
+                                    <?php do_action( 'soliloquy_before_video_meta_table', $id, $data, $post_id ); ?>
                                     <!-- Settings -->
-			                        <div class="settings">
-                                    	<?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
-                                    	<?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
-                                    	
-                                    	<!-- Status -->
+                                    <div class="settings">
+                                        <?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
+                                        <?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
+                                        
+                                        <!-- Status -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
-											<select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
-												<option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
-												<option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
-											</select>
+                                            <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
+                                            <select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
+                                                <option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
+                                                <option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
+                                            </select>
                                         </label>
-                                    	
-                                    	<!-- Title -->
+                                        
+                                        <!-- Title -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
-											<input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
+                                            <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
                                         </label>
                                         
                                         <!-- URL -->
-	                                    <?php do_action( 'soliloquy_before_video_meta_url', $id, $data, $post_id ); ?>
+                                        <?php do_action( 'soliloquy_before_video_meta_url', $id, $data, $post_id ); ?>
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'URL', 'soliloquy' ); ?></span>
-											<input id="soliloquy-url-<?php echo $id; ?>" class="soliloquy-url" type="text" name="_soliloquy[meta_url]" value="<?php echo ( ! empty( $data['url'] ) ? esc_url( $data['url'] ) : '' ); ?>" data-soliloquy-meta="url" />
-										</label>
-										
-										<!-- Placeholder -->
-										<?php do_action( 'soliloquy_before_video_meta_thumb', $id, $data, $post_id ); ?>
+                                            <span class="name"><?php _e( 'URL', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-url-<?php echo $id; ?>" class="soliloquy-url" type="text" name="_soliloquy[meta_url]" value="<?php echo ( ! empty( $data['url'] ) ? esc_url( $data['url'] ) : '' ); ?>" data-soliloquy-meta="url" />
+                                        </label>
+                                        
+                                        <!-- Placeholder -->
+                                        <?php do_action( 'soliloquy_before_video_meta_thumb', $id, $data, $post_id ); ?>
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Placeholder', 'soliloquy' ); ?></span>
-											<input id="soliloquy-src-<?php echo $id; ?>" class="soliloquy-src" type="text" name="_soliloquy[meta_src]" value="<?php echo ( ! empty( $data['src'] ) ? esc_url( $data['src'] ) : '' ); ?>" data-soliloquy-meta="src" />
+                                            <span class="name"><?php _e( 'Placeholder', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-src-<?php echo $id; ?>" class="soliloquy-src" type="text" name="_soliloquy[meta_src]" value="<?php echo ( ! empty( $data['src'] ) ? esc_url( $data['src'] ) : '' ); ?>" data-soliloquy-meta="src" />
                                         </label>
                                         
                                         <!-- Caption -->
-										<?php do_action( 'soliloquy_before_video_meta_caption', $id, $data, $post_id ); ?>
-										<div class="setting">
-	                                        <span class="name"><?php _e( 'Caption', 'soliloquy' ); ?></span>
-	                                        <?php 
-		                                    $caption = ( ! empty( $data['caption'] ) ? $data['caption'] : '' );
-		                                    wp_editor( $caption, 'soliloquy-caption-' . $id, array( 
-		                                    	'media_buttons' => false, 
-		                                    	'wpautop' 		=> false, 
-		                                    	'tinymce' 		=> false, 
-		                                    	'textarea_name' => '_soliloquy[meta_caption]', 
-		                                    	'quicktags' => array( 
-		                                    		'buttons' => 'strong,em,link,ul,ol,li,close' 
-		                                    	),
-		                                    ) ); 
-		                                    ?> 
+                                        <?php do_action( 'soliloquy_before_video_meta_caption', $id, $data, $post_id ); ?>
+                                        <div class="setting">
+                                            <span class="name"><?php _e( 'Caption', 'soliloquy' ); ?></span>
+                                            <?php 
+                                            $caption = ( ! empty( $data['caption'] ) ? $data['caption'] : '' );
+                                            wp_editor( $caption, 'soliloquy-caption-' . $id, array( 
+                                                'media_buttons' => false, 
+                                                'wpautop'       => false, 
+                                                'tinymce'       => false, 
+                                                'textarea_name' => '_soliloquy[meta_caption]', 
+                                                'quicktags' => array( 
+                                                    'buttons' => 'strong,em,link,ul,ol,li,close' 
+                                                ),
+                                            ) ); 
+                                            ?> 
                                         </div>
-	                                    
+                                        
                                         <?php do_action( 'soliloquy_after_video_meta_settings', $id, $data, $post_id ); ?>
                                         <?php do_action( 'soliloquy_after_meta_settings', $id, $data, $post_id ); ?>
-			                        </div>
-			                        <!-- /.settings -->  
-			                        
+                                    </div>
+                                    <!-- /.settings -->  
+                                    
                                     <?php do_action( 'soliloquy_after_video_meta_table', $id, $data, $post_id ); ?>
                                     <?php do_action( 'soliloquy_after_meta_table', $id, $data, $post_id ); ?>
                                     
                                     <!-- Actions -->
-			                        <div class="actions">
-			                            <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
+                                    <div class="actions">
+                                        <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
                                 
-										<!-- Save Spinner -->
-				                        <span class="settings-save-status">
-					                        <span class="spinner"></span>
-					                        <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
-				                        </span>
+                                        <!-- Save Spinner -->
+                                        <span class="settings-save-status">
+                                            <span class="spinner"></span>
+                                            <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
+                                        </span>
                                     </div>
-			                        <!-- /.actions -->
-			                    
-			                    </div>
-	                        </div>
+                                    <!-- /.actions -->
+                                
+                                </div>
+                            </div>
                         </div>
                     </div><!-- end .media-frame -->
                 </div><!-- end .media-modal-content -->
@@ -1792,106 +1809,106 @@ class Soliloquy_Metaboxes {
                 <a class="media-modal-close" href="#"><span class="media-modal-icon"></span></a>
                 
                 <div class="media-modal-content">
-	                 <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
-	                    
-	                    <!-- Back / Next Buttons -->
-	                    <div class="edit-media-header">
-		                    <button class="left dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
-		                    </button>
-		                    <button class="right dashicons" data-attachment-id="">
-			                    <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
-		                    </button>
-	                    </div>
-	                    
-	                    <!-- Title -->
+                     <div class="edit-attachment-frame mode-select hide-menu hide-router soliloquy-media-frame soliloquy-meta-wrap">
+                        
+                        <!-- Back / Next Buttons -->
+                        <div class="edit-media-header">
+                            <button class="left dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit previous media item', 'soliloquy' ); ?></span>
+                            </button>
+                            <button class="right dashicons" data-attachment-id="">
+                                <span class="screen-reader-text"><?php _e( 'Edit next media item', 'soliloquy' ); ?></span>
+                            </button>
+                        </div>
+                        
+                        <!-- Title -->
                         <div class="media-frame-title">
                             <h1><?php _e( 'Edit Metadata', 'soliloquy' ); ?></h1>
                         </div>
                         
                         <!-- Content -->
                         <div class="media-frame-content" id="soliloquy-meta-table-<?php echo $id; ?>">
-	                        <div tabindex="0" role="checkbox" class="attachment-details save-ready">
-		                        <!-- Left -->
-		                        <div class="attachment-media-view portrait">
-			                        <div class="thumbnail thumbnail-image">
-				                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
-				                        
-				                        <?php echo ( ! empty( $data['code'] ) ? $data['code'] : '' ); ?>
-				                    	
-				                    	<?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?>  
-				                    </div>
-			                    </div>
-			                    
-			                    <!-- Right -->
-		                        <div class="attachment-info">
-			                        <!-- Details -->
-			                        <div class="details">
-				                        <!-- Title -->
-				                        <div class="filename">
-											<strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
-											<?php _e( 'The title can take any type of HTML. You can adjust the position of the titles in the main Lightbox settings.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-				                        
-										<!-- Code -->
-				                        <div class="filename">
-											<strong><?php _e( 'Code', 'soliloquy' ); ?></strong>
-											<?php _e( 'Remember, custom HTML slides are, in fact, custom. You are responsible for styling and manipulating the code you insert into the slide; with great power comes great responsibility.', 'soliloquy' ); ?>
-											<br /><br />
-				                        </div>
-			                        </div>
-			                        
-			                        <?php do_action( 'soliloquy_before_html_meta_table', $id, $data, $post_id ); ?>
+                            <div tabindex="0" role="checkbox" class="attachment-details save-ready">
+                                <!-- Left -->
+                                <div class="attachment-media-view portrait">
+                                    <div class="thumbnail thumbnail-image">
+                                        <?php do_action( 'soliloquy_before_preview', $id, $data, $post_id ); ?> 
+                                        
+                                        <?php echo ( ! empty( $data['code'] ) ? $data['code'] : '' ); ?>
+                                        
+                                        <?php do_action( 'soliloquy_after_preview', $id, $data, $post_id ); ?>  
+                                    </div>
+                                </div>
+                                
+                                <!-- Right -->
+                                <div class="attachment-info">
+                                    <!-- Details -->
+                                    <div class="details">
+                                        <!-- Title -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Title', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'The title can take any type of HTML. You can adjust the position of the titles in the main Lightbox settings.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                        
+                                        <!-- Code -->
+                                        <div class="filename">
+                                            <strong><?php _e( 'Code', 'soliloquy' ); ?></strong>
+                                            <?php _e( 'Remember, custom HTML slides are, in fact, custom. You are responsible for styling and manipulating the code you insert into the slide; with great power comes great responsibility.', 'soliloquy' ); ?>
+                                            <br /><br />
+                                        </div>
+                                    </div>
+                                    
+                                    <?php do_action( 'soliloquy_before_html_meta_table', $id, $data, $post_id ); ?>
                                     <!-- Settings -->
-			                        <div class="settings">
-                                    	<?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
-                                    	<?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
-                                    	
-                                    	<!-- Status -->
+                                    <div class="settings">
+                                        <?php do_action( 'soliloquy_before_meta_table', $id, $data, $post_id ); ?>
+                                        <?php do_action( 'soliloquy_before_meta_settings', $id, $data, $post_id ); ?>
+                                        
+                                        <!-- Status -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
-											<select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
-												<option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
-												<option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
-											</select>
+                                            <span class="name"><?php _e( 'Status', 'soliloquy' ); ?></span>
+                                            <select id="soliloquy-status-<?php echo $id; ?>" class="soliloquy-status" name="_soliloquy[meta_status]" size="1" data-soliloquy-meta="status">
+                                                <option value="pending"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Draft', 'soliloquy' ); ?></option>
+                                                <option value="active"<?php selected( 'active', $data['status'] ); ?>><?php _e( 'Published', 'soliloquy' ); ?></option>
+                                            </select>
                                         </label>
-                                    	
-                                    	<!-- Title -->
+                                        
+                                        <!-- Title -->
                                         <label class="setting">
-	                                        <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
-											<input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
+                                            <span class="name"><?php _e( 'Title', 'soliloquy' ); ?></span>
+                                            <input id="soliloquy-title-<?php echo $id; ?>" class="soliloquy-title" type="text" name="_soliloquy[meta_title]" value="<?php echo ( ! empty( $data['title'] ) ? esc_attr( $data['title'] ) : '' ); ?>" data-soliloquy-meta="title" />
                                         </label>
                                         
                                         <!-- Code -->
                                         <?php do_action( 'soliloquy_before_html_meta_code', $id, $data, $post_id ); ?>
                                         <div class="code">
-	                                        <span class="name"><?php _e( 'Code', 'soliloquy' ); ?></span>
-											<textarea id="soliloquy-code-<?php echo $id; ?>" name="_soliloquy[meta_code]" class="soliloquy-html-code" data-soliloquy-meta="code"><?php echo ( ! empty( $data['code'] ) ? $data['code'] : '' ); ?></textarea>
+                                            <span class="name"><?php _e( 'Code', 'soliloquy' ); ?></span>
+                                            <textarea id="soliloquy-code-<?php echo $id; ?>" name="_soliloquy[meta_code]" class="soliloquy-html-code" data-soliloquy-meta="code"><?php echo ( ! empty( $data['code'] ) ? $data['code'] : '' ); ?></textarea>
                                         </div>
-										         
+                                                 
                                         <?php do_action( 'soliloquy_after_html_meta_settings', $id, $data, $post_id ); ?>
                                         <?php do_action( 'soliloquy_after_meta_settings', $id, $data, $post_id ); ?>
-			                        </div>
-			                        <!-- /.settings -->  
-			                        
+                                    </div>
+                                    <!-- /.settings -->  
+                                    
                                     <?php do_action( 'soliloquy_after_html_meta_table', $id, $data, $post_id ); ?>
                                     <?php do_action( 'soliloquy_after_meta_table', $id, $data, $post_id ); ?>
                                     
                                     <!-- Actions -->
-			                        <div class="actions">
-			                            <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
+                                    <div class="actions">
+                                        <a href="#" class="soliloquy-meta-submit button media-button button-large button-primary media-button-insert" title="<?php esc_attr_e( 'Save Metadata', 'soliloquy' ); ?>" data-soliloquy-item="<?php echo $id; ?>"><?php _e( 'Save Metadata', 'soliloquy' ); ?></a>
                                 
-										<!-- Save Spinner -->
-				                        <span class="settings-save-status">
-					                        <span class="spinner"></span>
-					                        <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
-				                        </span>
+                                        <!-- Save Spinner -->
+                                        <span class="settings-save-status">
+                                            <span class="spinner"></span>
+                                            <span class="saved"><?php _e( 'Saved.', 'soliloquy' ); ?></span>
+                                        </span>
                                     </div>
-			                        <!-- /.actions -->
-			                    
-			                    </div>
-	                        </div>
+                                    <!-- /.actions -->
+                                
+                                </div>
+                            </div>
                         </div>
                     </div><!-- end .media-frame -->
                 </div><!-- end .media-modal-content -->
@@ -1916,7 +1933,7 @@ class Soliloquy_Metaboxes {
      * @return array Slider
      */
     public function change_slider_states( $post_id ) {
-	    
+        
         $slider_data = get_post_meta( $post_id, '_sol_slider_data', true );
         if ( ! empty( $slider_data['slider'] ) ) {
             foreach ( (array) $slider_data['slider'] as $id => $item ) {
@@ -2148,6 +2165,20 @@ class Soliloquy_Metaboxes {
 
         $instance = Soliloquy_Common::get_instance();
         return $instance->get_slider_positions();
+
+    }
+
+    /**
+     * Helper method for retrieving caption positions.
+     *
+     * @since 2.4.1.1
+     *
+     * @return array Array of caption position data.
+     */
+    public function get_caption_positions() {
+
+        $instance = Soliloquy_Common::get_instance();
+        return $instance->get_caption_positions();
 
     }
 

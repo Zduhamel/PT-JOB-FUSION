@@ -319,7 +319,7 @@ class Soliloquy_Settings {
                 'installing'       => __( 'Installing...', 'soliloquy' ),
                 'proceed'          => __( 'Proceed', 'soliloquy' ),
                 'ajax'             => admin_url( 'admin-ajax.php' ),
-                'redirect'         => add_query_arg( array( 'post_type' => 'soliloquy', 'soliloquy-upgraded' => true ), admin_url( 'edit.php' ) ),
+                'redirect'         => esc_url( add_query_arg( array( 'post_type' => 'soliloquy', 'soliloquy-upgraded' => true ), admin_url( 'edit.php' ) ) ),
                 'upgrade_nonce'    => wp_create_nonce( 'soliloquy-upgrade' )
             )
         );
@@ -691,7 +691,7 @@ class Soliloquy_Settings {
      */
     public function settings_link( $links ) {
 
-        $settings_link = sprintf( '<a href="%s">%s</a>', add_query_arg( array( 'post_type' => 'soliloquy', 'page' => 'soliloquy-settings' ), admin_url( 'edit.php' ) ), __( 'Settings', 'soliloquy' ) );
+        $settings_link = sprintf( '<a href="%s">%s</a>', esc_url( add_query_arg( array( 'post_type' => 'soliloquy', 'page' => 'soliloquy-settings' ), admin_url( 'edit.php' ) ) ), __( 'Settings', 'soliloquy' ) );
         array_unshift( $links, $settings_link );
 
         return $links;

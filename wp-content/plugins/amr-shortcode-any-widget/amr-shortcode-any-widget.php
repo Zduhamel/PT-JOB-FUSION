@@ -4,7 +4,7 @@ Plugin Name: amr shortcode any widget
 Plugin URI: http://webdesign.anmari.com/shortcode-any-widget/
 Description: Include any widget in a page for any theme.  [do_widget widgetname ] or  [do_widget "widget name" ] [do_widget id=widgetnamedashed-n ]or include a whole widget area [do_widget_area]. Please read: <a href="https://wordpress.org/plugins/amr-shortcode-any-widget/installation/">Installation</a> and <a href="https://wordpress.org/plugins/amr-shortcode-any-widget/faq/">FAQ</a>.
 Author: anmari
-Version: 2.5
+Version: 2.6
 Author URI: http://webdesign.anmari.com
 
 */
@@ -82,7 +82,7 @@ if it is in, then get the instance  data and use that */
 		echo '<br />No widgets defined at all in any sidebar!'; 
 		return (false);
 	}
-
+
 	extract(shortcode_atts(array(
 		'sidebar' => 'Widgets for Shortcodes',
 		'id' => '',
@@ -97,7 +97,7 @@ if it is in, then get the instance  data and use that */
 	
 	/* compatibility check - if the name is not entered, then the first parameter is the name */
 	if (empty($name) and !empty($atts[0]))  
-		$name = $atts[0];
+		$name = $atts[0];
 
 	/* the widget need not be specified, [do_widget widgetname] is adequate */
 	if (!empty($name)) {  // we have a name
@@ -189,9 +189,9 @@ if it is in, then get the instance  data and use that */
 			}
 	}
 			
-	return ($output);
+	return ($output);
 }
-/* -------------------------------------------------------------------------*/
+/* -------------------------------------------------------------------------*/
 function shortcode_sidebar( $widget_id, $name="widgets_for_shortcode", $title=true, $class='', $wrap='', $widget_classes='') { /* This is basically the wordpress code, slightly modified  */
 	global $wp_registered_sidebars, $wp_registered_widgets;
 	
@@ -207,7 +207,7 @@ function shortcode_sidebar( $widget_id, $name="widgets_for_shortcode", $title=tr
 	 
 	/* lifted from wordpress code, keep as similar as possible for now */
 
-		if ( !isset($wp_registered_widgets[$widget_id]) ) continue;
+		if ( !isset($wp_registered_widgets[$widget_id]) ) return; // wp had continue
 
 		$params = array_merge(
 			array( 

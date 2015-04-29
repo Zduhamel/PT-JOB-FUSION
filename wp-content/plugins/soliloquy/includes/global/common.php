@@ -77,30 +77,30 @@ class Soliloquy_Common {
         global $_wp_additional_image_sizes;
         $wp_sizes = get_intermediate_image_sizes();
         foreach ( (array) $wp_sizes as $size ) {
-			if ( isset( $_wp_additional_image_sizes[$size] ) ) {
-				$width 	= absint( $_wp_additional_image_sizes[$size]['width'] );
-				$height = absint( $_wp_additional_image_sizes[$size]['height'] );
-			} else {
-				$width	= absint( get_option( $size . '_size_w' ) );
-				$height	= absint( get_option( $size . '_size_h' ) );
-			}
-
-			if ( ! $width && ! $height ) {
-				$sizes[] = array(
-				    'value'  => $size,
-				    'name'   => ucwords( str_replace( array( '-', '_' ), ' ', $size ) ),
-				    'width'  => 0,
-				    'height' => 0
-				);
-			} else {
-			    $sizes[] = array(
-				    'value'  => $size,
-				    'name'   => ucwords( str_replace( array( '-', '_' ), ' ', $size ) ) . ' (' . $width . ' &#215; ' . $height . ')',
-				    'width'  => $width,
-				    'height' => $height
-				);
+            if ( isset( $_wp_additional_image_sizes[$size] ) ) {
+                $width  = absint( $_wp_additional_image_sizes[$size]['width'] );
+                $height = absint( $_wp_additional_image_sizes[$size]['height'] );
+            } else {
+                $width  = absint( get_option( $size . '_size_w' ) );
+                $height = absint( get_option( $size . '_size_h' ) );
             }
-		}
+
+            if ( ! $width && ! $height ) {
+                $sizes[] = array(
+                    'value'  => $size,
+                    'name'   => ucwords( str_replace( array( '-', '_' ), ' ', $size ) ),
+                    'width'  => 0,
+                    'height' => 0
+                );
+            } else {
+                $sizes[] = array(
+                    'value'  => $size,
+                    'name'   => ucwords( str_replace( array( '-', '_' ), ' ', $size ) ) . ' (' . $width . ' &#215; ' . $height . ')',
+                    'width'  => $width,
+                    'height' => $height
+                );
+            }
+        }
 
         return apply_filters( 'soliloquy_slider_sizes', $sizes );
 
@@ -197,6 +197,38 @@ class Soliloquy_Common {
     }
 
     /**
+     * Helper method for retrieving caption positions.
+     *
+     * @since 2.4.1.1
+     *
+     * @return array Array of slider position data.
+     */
+    public function get_caption_positions() {
+
+        $positions = array(
+            array(
+                'value' => 'top',
+                'name'  => __( 'Top', 'soliloquy' )
+            ),
+            array(
+                'value' => 'bottom',
+                'name'  => __( 'Bottom', 'soliloquy' )
+            ),
+            array(
+                'value' => 'left',
+                'name'  => __( 'Left', 'soliloquy' )
+            ),
+            array(
+                'value' => 'right',
+                'name'  => __( 'Right', 'soliloquy' )
+            ),
+        );
+
+        return apply_filters( 'soliloquy_caption_positions', $positions );
+
+    }
+
+    /**
      * Helper method for retrieving aria-live priorities
      *
      * @since 2.4.0.9
@@ -264,42 +296,43 @@ class Soliloquy_Common {
     public function get_config_defaults( $post_id ) {
 
         $defaults = array(
-            'type'          => 'default',
-            'slider_theme'  => 'base',
-            'slider_size'   => 'default',
-            'slider_width'  => 960,
-            'slider_height' => 300,
-            'transition'    => 'fade',
-            'duration'      => 5000,
-            'speed'         => 400,
-            'position'      => 'center',
-            'gutter'        => 20,
-            'slider'        => 1,
-            'caption_delay' => 0,
-            'mobile'        => 1,
-            'mobile_width'  => 600,
-            'mobile_height' => 200,
-            'auto'          => 1,
-            'smooth'        => 1,
-            'dimensions'	=> 0,
-            'arrows'        => 1,
-            'control'       => 1,
-            'pauseplay'     => 0,
-            'mobile_caption'=> 0,
-            'hover'         => 0,
-            'keyboard'      => 1,
-            'css'           => 1,
-            'loop'          => 1,
-            'random'        => 0,
-            'delay'         => 0,
-            'start'         => 0,
-            'aria_live'     => 'polite',
+            'type'              => 'default',
+            'slider_theme'      => 'base',
+            'slider_size'       => 'default',
+            'slider_width'      => 960,
+            'slider_height'     => 300,
+            'transition'        => 'fade',
+            'duration'          => 5000,
+            'speed'             => 400,
+            'position'          => 'center',
+            'gutter'            => 20,
+            'slider'            => 1,
+            'caption_position'  => 'bottom',
+            'caption_delay'     => 0,
+            'mobile'            => 1,
+            'mobile_width'      => 600,
+            'mobile_height'     => 200,
+            'auto'              => 1,
+            'smooth'            => 1,
+            'dimensions'        => 0,
+            'arrows'            => 1,
+            'control'           => 1,
+            'pauseplay'         => 0,
+            'mobile_caption'    => 0,
+            'hover'             => 0,
+            'keyboard'          => 1,
+            'css'               => 1,
+            'loop'              => 1,
+            'random'            => 0,
+            'delay'             => 0,
+            'start'             => 0,
+            'aria_live'         => 'polite',
 
             // Misc
             'classes'       => array(),
             'title'         => '',
             'slug'          => '',
-            'rtl'			=> 0,
+            'rtl'           => 0,
         );
         return apply_filters( 'soliloquy_defaults', $defaults, $post_id );
 

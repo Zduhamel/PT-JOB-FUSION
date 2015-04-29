@@ -87,6 +87,13 @@ Soliloquy has many Addons that extend its default functionality to make it do in
 
 == Changelog ==
 
+= 2.3.0 =
+* Fixed: Removed deprecated "This Post's Slider" option on Add Slider button
+* Fixed: Added esc_url on add_query_arg()
+
+= 2.2.9 =
+* Added: is_mobile() checking enhanced to also use wp_is_mobile() if other checks return false
+
 = 2.2.8 =
 * Fix: Caption link color sometimes matched caption background color, making it difficult to see links in captions
 

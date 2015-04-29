@@ -214,22 +214,61 @@
     width: 32px;
     height: 32px;
     background: rgba(0, 0, 0, .7)url(images/play.png) no-repeat scroll 50% 50%}
+
+/**
+* Captions
+*/
 .soliloquy-container .soliloquy-caption {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
     z-index: 1120;
-}
-.soliloquy-container .soliloquy-caption-inside {
-    background: rgba(0, 0, 0, .5);
-    font-size: 1em;
-    line-height: 1.25;
-    display: block;
-    color: #fff;
-    text-shadow: 0 1px 1px #000;
-    text-align: center;
-    padding: 10px;
+
+    /**
+    * Caption Position
+    */
+    &.soliloquy-caption-top {
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+    &.soliloquy-caption-bottom {
+        width: 100%;
+        bottom: 0;
+        left: 0;
+    }
+    &.soliloquy-caption-left {
+        width: 30%;
+        height: 100%;
+        top: 0;
+        left: 0;
+
+        .soliloquy-caption-inside {
+            height: 100%;
+        }
+    }
+    &.soliloquy-caption-right {
+        width: 30%;
+        height: 100%;
+        top: 0;
+        right: 0;
+
+        .soliloquy-caption-inside {
+            height: 100%;
+        }
+    }
+
+    /**
+    * Inner Caption
+    */
+    .soliloquy-caption-inside {
+        background: rgba(0, 0, 0, .5);
+        font-size: 1em;
+        line-height: 1.25;
+        display: block;
+        color: #fff;
+        text-shadow: 0 1px 1px #000;
+        text-align: center;
+        padding: 10px;
+    }
 }
 .soliloquy-container .soliloquy-controls {
     opacity: 0;
@@ -237,10 +276,6 @@
     filter: alpha(opacity=0);
     -moz-opacity: 0;
     -khtml-opacity: 0;
-}
-.soliloquy-container .soliloquy-video-slide .soliloquy-caption {
-    bottom: auto;
-    top: 0;
 }
 .soliloquy-container .soliloquy-video-icon {
     margin: 0;
