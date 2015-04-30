@@ -1,0 +1,473 @@
+/*custom css backup */
+
+/* Enter Your Custom CSS Here */
+.site-primary-navigation{
+right:20px;
+}
+.row{
+  margin: 0;
+  padding: 0 .15em;
+}
+
+.blog-archive {
+margin-top: 100px !important;
+}
+
+section#jobify_widget_jobs_search-2 {
+  margin-top: -100px;
+  width: 100%;
+}
+.footer-widgets {
+  padding: 80px 40px;
+}
+.job_types {
+background:#3499cb;
+}
+.site-title {
+margin-left:2em;
+}
+
+.create-account {
+  clear: both;
+}
+h3#already {
+  text-align: center;
+}
+
+table.fixed {
+  table-layout: auto;
+}
+
+.job_types li {
+  color: white;
+}
+
+table.job-manager-jobs {
+  table-layout: auto;
+}
+
+.job_filters{
+background: rgba(0,0,0,.1) !important;
+}
+
+.search_jobs {
+background: rgba(0,0,0,.1) !important;
+}
+
+.no_padding {
+padding:0 0;
+
+}
+
+.search_jobs_background {
+
+
+}
+#jobify_widget_jobs_spotlight-2 {
+  margin-top: -20px;
+}
+
+section#text-4 {
+  padding: 0;
+  top-margin:1em;
+  top:.25em;
+}
+
+section#learnmorevideo {
+  text-align: center;
+  background: #3499cb;
+  padding: 3em;
+}
+
+.job_margin_fix {
+  background: rgba(0, 0, 0, 0.4);
+  z-index:99;
+}
+
+.soliloquy-container {
+z-index:-9;
+}
+
+.soliloquy-container .home-slider-button {
+border: 2px solid white;
+  padding: 5px;
+    text-align: center;
+}
+
+
+.search_jobs {
+box-shadow:none;
+
+}
+
+
+.page-title {
+color: #3399cc;
+font-weight:700;
+}
+
+
+.job-overview-title {
+color: #3399cc;
+}
+
+
+.related-jobs {
+color: #3399cc;
+}
+
+
+.job_listing-widget-title-top {
+color:#3399cc;
+}
+
+
+#jmfe-wrap-benefits {
+margin-top:1em;
+}
+
+#jobify_widget_jobs_search-2 {
+z-index:999;
+}
+
+#jobify_widget_slider_hero-1 {
+z-index:1;
+}
+
+.jobify_widget_jobs_spotlight {
+margin-bottom:100px;
+}
+
+#text-3 {
+width=100%;
+  height:40em;
+  overflow:hidden;
+    width: 100%;
+  max-width: 100%;
+  padding: 0;
+  text-align:center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+
+
+#videohome {
+width="100%;
+  max-height:500px;
+}
+
+
+video#bgvid { 
+    position: relative;
+  right: 0;
+  bottom: 0;
+min-width: 100%; 
+  min-height: 100%;
+  max-width:200%;
+width: auto; 
+  height: auto; 
+  z-index: -100;
+background: url(http://www.ptjobfusion.com/wp-content/uploads/sliderbackup.jpg) no-repeat;
+background-size: cover;
+  background-attatchment: scroll;
+}
+
+#slider_logo {
+z-index:99;
+  position:absolute;
+    margin-left: -10em;
+  margin-top:8em;
+width: 20em;
+  left:50%;
+}
+
+.homepage-widget.widget_text {
+min-width:100%
+
+}
+
+.learn_more_slider {
+    position:absolute;
+    margin-left: -7em;
+  margin-top:22.5em;
+width: 14em;
+  left:50%;
+
+}
+
+#learn_more_slider_link {
+  color:white;
+  font-family: "bree-serif",sans-serif;
+  font-style: italic;
+  font-size:1.7em;
+  border: white solid 1px;
+  padding: .75em 1em;
+    font-weight: 100;
+  text-decoration:none;
+  -moz-border-radius-topleft: 5px;
+-moz-border-radius-topright:5px;
+-moz-border-radius-bottomleft:5px;
+-moz-border-radius-bottomright:5px;
+-webkit-border-top-left-radius:5px;
+-webkit-border-top-right-radius:5px;
+-webkit-border-bottom-left-radius:5px;
+-webkit-border-bottom-right-radius:5px;
+border-top-left-radius:5px;
+border-top-right-radius:5px;
+border-bottom-left-radius:5px;
+border-bottom-right-radius:5px;
+
+}
+#learn_more_slider_link:hover {
+  color: #3499cb;
+  padding: .75em;
+  text-decoration:none;
+  background:white;
+  
+
+}
+
+.row.pricing-table-wrapper {
+  width: 90%;
+  margin: 0 auto;
+}
+
+#pricing_center {
+text-align:center;
+}
+
+.search-page-job {
+text-align:center;
+}
+
+.search-page-residency {
+text-align:center;
+}
+
+.search-page-candidate {
+text-align:center;
+}
+
+.search-page-job a {
+background: #3399cc;
+  color:white;
+}
+
+.search-page-residency a {
+background: #3399cc;
+  color:white;
+}
+
+.search-page-candidate a {
+background: #3399cc;
+  color:white;
+}
+
+.search-page-job a:hover {
+background: #1b78a7;
+  color:white;
+}
+
+.search-page-residency a:hover {
+background: #1b78a7;
+  color:white;
+}
+
+.search-page-candidate a:hover {
+background: #1b78a7;
+  color:white;
+}
+
+.post-page-position {
+text-align:center;
+}
+
+.post-page-resume {
+text-align:center;
+}
+
+.post-page-position a {
+background: #3399cc;
+  color:white;
+}
+
+.post-page-resume a {
+background: #3399cc;
+  color:white;
+}
+
+.post-page-position a:hover {
+background: #1b78a7;
+  color:white;
+}
+
+.post-page-resume a:hover {
+background: #1b78a7;
+  color:white;
+}
+
+
+.white-font {
+color:white !important;
+}
+
+
+.woocommerce table.cart td.actions #coupon_code {
+width:140px !important;
+}
+
+.job-packages.row {
+  width: 80%;
+  margin: 2em auto;
+}
+section#text-5 {
+  margin-top: 3em;
+}
+
+.woocommerce #respond input#submit.alt, .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt {
+  background-color:#3399cc;
+
+}
+
+a.checkout-button.button.alt.wc-forward:hover {
+  background-color: #1b78a7;
+}
+
+@media only screen and (max-width: 800px) {
+body { 
+    background: url(http://www.ptjobfusion.com/wp-conten/uploads/sliderbackup.jpg) #000 no-repeat center center fixed; 
+  }
+  th.job_title {
+  width: 120px;
+}
+  
+  td.job_title > a {
+  font-size: .75em;
+}
+  
+    td.date {
+  
+  text-align:center;
+  }
+    td.expires {
+  
+  text-align:center;
+  }
+    td.filled {
+  
+  text-align:center;
+  }
+    td.applications {
+  
+  text-align:center;
+  }
+
+  .entry-content .job_listing_packages_title .button, .entry-content .resume_packages_title .button, .job_listing_packages_title .button, .resume_packages_title .button {
+  
+  float:none;
+  margin-left: auto;
+  margin-right: auto;
+  }
+  .job_listing_preview_title input[name=continue], .resume_preview_title input[name=continue] {
+  float:none;
+  }
+  .job_listing_preview_title input[name=edit_job], .resume_preview_title input[name=edit_resume] {
+  float:none;
+  }
+  
+  th {
+    font-size: .5em;
+   -moz-hyphens: none;
+  -ms-hyphens: none;
+  -webkit-hyphens: none;
+  hyphens: none;
+}
+#bgvid { 
+    display: none; 
+  }
+
+    .job_margin_fix {
+margin-top:0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index:99;
+}
+  
+  section#promovideocontainer {
+
+  padding: 1em;
+}
+  
+  #text-3 {
+width=100%;
+  height:20em;
+  overflow:hidden;
+    width: 100%;
+  max-width: 100%;
+  padding: 0;
+  text-align:center;
+      background:#3399cc;
+}
+  
+ #slider_logo {
+
+z-index:99;
+  position:absolute;
+    margin-left: -7em;
+  margin-top:3em;
+width: 14em;
+  left:50%;
+} 
+  
+  .woocommerce #content table.cart td.actions .button, .woocommerce #content table.cart td.actions .input-text, .woocommerce #content table.cart td.actions input, .woocommerce table.cart td.actions .button, .woocommerce table.cart td.actions .input-text, .woocommerce table.cart td.actions input, .woocommerce-page #content table.cart td.actions .button, .woocommerce-page #content table.cart td.actions .input-text, .woocommerce-page #content table.cart td.actions input, .woocommerce-page table.cart td.actions .button, .woocommerce-page table.cart td.actions .input-text, .woocommerce-page table.cart td.actions input {
+  width:48% !important;
+  } 
+  
+  
+  
+}
+
+@media only screen and (min-width: 0px) {
+  .job_margin_fix {
+  max-width:100%;
+  }
+
+}
+
+@media only screen and (min-width: 1200px) {
+  .job_margin_fix {
+  max-width:100%;
+  }
+
+}
+
+
+
+@media only screen and (max-width : 992px) {
+#jobify_widget_price_table_wc-2 > div > div > div:nth-child(1) {margin-left: 0;}
+
+
+#learn_more_slider_link {
+  font-size:1em;
+}
+  
+  .coupon_area {
+  font-size:.75em !important;
+   -moz-hyphens: none;
+  -ms-hyphens: none;
+  -webkit-hyphens: none;
+  hyphens: none;
+  }
+  
+  section#jobify_widget_jobs_search-2 {
+  margin-top: 0;
+}
+  
+  
+}
+  
+@media only screen and (max-width:768px){
+.learn_more_slider {
+ margin-top: 12.5em;
+}
+}
+  
