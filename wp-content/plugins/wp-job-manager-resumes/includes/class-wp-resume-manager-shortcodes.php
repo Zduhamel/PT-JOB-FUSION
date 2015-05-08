@@ -120,8 +120,9 @@ class WP_Resume_Manager_Shortcodes {
 		global $resume_manager;
 
 		if ( ! is_user_logged_in() ) {
-			_e( 'You need to be signed in to view this page.', 'wp-job-manager-resumes' );
-			return;
+			ob_start();
+			get_job_manager_template( 'candidate-dashboard-login.php', array(), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
+			return ob_get_clean();
 		}
 
 		extract( shortcode_atts( array(

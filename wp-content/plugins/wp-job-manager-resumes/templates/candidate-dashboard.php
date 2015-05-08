@@ -1,4 +1,8 @@
-<?php $column_count = get_option( 'resume_manager_enable_categories' ) ? 5 : 4; ?>
+<?php
+$column_count               = get_option( 'resume_manager_enable_categories' ) ? 5 : 4;
+$submission_limit           = get_option( 'resume_manager_submission_limit' );
+$submit_resume_form_page_id = get_option( 'resume_manager_submit_resume_form_page_id' );
+?>
 <div id="resume-manager-candidate-dashboard">
 	<p><?php echo _n( 'Your resume can be viewed, edited or removed below.', 'Your resume(s) can be viewed, edited or removed below.', resume_manager_count_user_resumes(), 'wp-job-manager-resumes' ); ?></p>
 	<table class="resume-manager-resumes">
@@ -75,11 +79,11 @@
 				<?php endforeach; ?>
 			<?php endif; ?>
 		</tbody>
-		<?php if ( ( $page_id = get_option( 'resume_manager_submit_resume_form_page_id' ) ) && ( $submission_limit = get_option( 'resume_manager_submission_limit' ) ) && resume_manager_count_user_resumes() < $submission_limit ) : ?>
+		<?php if ( $submit_resume_form_page_id && ( resume_manager_count_user_resumes() < $submission_limit || ! $submission_limit ) ) : ?>
 			<tfoot>
 				<tr>
 					<td colspan="<?php echo $column_count; ?>">
-						<a href="<?php echo esc_url( get_permalink( $page_id ) ); ?>"><?php _e( 'Add Resume', 'wp-job-manager-resumes' ); ?></a>
+						<a href="<?php echo esc_url( get_permalink( $submit_resume_form_page_id ) ); ?>"><?php _e( 'Add Resume', 'wp-job-manager-resumes' ); ?></a>
 					</td>
 				</tr>
 			</tfoot>

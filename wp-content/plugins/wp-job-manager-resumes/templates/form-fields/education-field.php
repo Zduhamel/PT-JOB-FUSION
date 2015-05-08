@@ -10,7 +10,7 @@
 							// Get name and value
 							$subfield['name']  = 'candidate_education_' . $subkey . '[]';
 							$subfield['value'] = $education[ $subkey ];
-							WP_Resume_Manager_Form_Submit_Resume::get_field_template( $subkey, $subfield );
+							$class->get_field_template( $subkey, $subfield );
 						?>
 					</div>
 				</fieldset>
@@ -32,7 +32,7 @@
 						<?php
 							// Get name and value
 							$subfield['name']  = 'candidate_education_' . $subkey . '[]';
-							WP_Resume_Manager_Form_Submit_Resume::get_field_template( $subkey, $subfield );
+							$class->get_field_template( $subkey, $subfield );
 						?>
 					</div>
 				</fieldset>

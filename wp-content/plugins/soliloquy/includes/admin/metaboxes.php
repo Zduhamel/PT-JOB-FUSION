@@ -623,10 +623,11 @@ class Soliloquy_Metaboxes {
                 <div class="attachments-browser">
                     <div class="media-toolbar soliloquy-library-toolbar">
                         <div class="media-toolbar-primary">
-                            <span class="spinner soliloquy-spinner"></span><input type="search" placeholder="<?php esc_attr_e( 'Search', 'soliloquy' ); ?>" id="soliloquy-slider-search" class="search" value="" />
+                            <input type="search" placeholder="<?php esc_attr_e( 'Search', 'soliloquy' ); ?>" id="soliloquy-slider-search" class="search" value="" />
                         </div>
                         <div class="media-toolbar-secondary">
-                            <a class="button media-button button-large button-secodary soliloquy-load-library" href="#" data-soliloquy-offset="20"><?php _e( 'Load More Images from Library', 'soliloquy' ); ?></a><span class="spinner soliloquy-spinner"></span>
+                            <a class="button media-button button-large button-secodary soliloquy-load-library" href="#" data-soliloquy-offset="20"><?php _e( 'Load More Images from Library', 'soliloquy' ); ?></a>
+                            <span class="spinner soliloquy-spinner"></span>
                         </div>
                     </div>
                     <?php $library = get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'inherit', 'posts_per_page' => 20 ) ); ?>

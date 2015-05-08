@@ -1,8 +1,8 @@
 === Job Applications ===
 Contributors: mikejolley
 Requires at least: 3.8
-Tested up to: 4.1
-Stable tag: 1.7.3
+Tested up to: 4.2
+Stable tag: 2.0.5
 License: GNU General Public License v3.0
 
 Lets candidates submit applications to jobs which are stored on the employers jobs page, rather than simply emailed.
@@ -22,6 +22,34 @@ If you need help with customisation you will need to find and hire a developer c
 To install this plugin, please refer to the guide here: [http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation](http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation)
 
 == Changelog ==
+
+= 2.0.5 =
+* Only show resumes field when logged in.
+
+= 2.0.4 =
+* WPML config.
+* Fix rule validation.
+
+= 2.0.3 =
+* Fix application form _resume_id field assignment.
+* Fix from name.
+* Improve save meta box.
+
+= 2.0.2 =
+* Fix - Notice when no validation rules are set.
+* Tweak - Allow HTML email content.
+
+= 2.0.1 =
+* Tweak - Better checking to see if JM exists.
+
+= 2.0.0 =
+* Feature - Built in application form editor.
+* Feature - Built in application form notification editor.
+* Feature - Support HTML emails (detects HTML and switches automatically).
+* Feature - Send an editable email to candidates after apply.
+* Feature - Option to purge candidate data after X days.
+* Tweak - Added template file for success message.
+* Tweak - Added dedicated settings page.
 
 = 1.7.3 =
 * Workaround for already_applied_title when the_title doens't pass post_id

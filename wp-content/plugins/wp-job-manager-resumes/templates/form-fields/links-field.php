@@ -8,9 +8,9 @@
 					<div class="field">
 						<?php
 							// Get name and value
-							$subfield['name']  = 'link_' . $subkey . '[]';
+							$subfield['name']  = 'links_' . $subkey . '[]';
 							$subfield['value'] = $link[ $subkey ];
-							WP_Resume_Manager_Form_Submit_Resume::get_field_template( $subkey, $subfield );
+							$class->get_field_template( $subkey, $subfield );
 						?>
 					</div>
 				</fieldset>
@@ -31,8 +31,8 @@
 					<div class="field">
 						<?php
 							// Get name and value
-							$subfield['name']  = 'link_' . $subkey . '[]';
-							WP_Resume_Manager_Form_Submit_Resume::get_field_template( $subkey, $subfield );
+							$subfield['name']  = 'links_' . $subkey . '[]';
+							$class->get_field_template( $subkey, $subfield );
 						?>
 					</div>
 				</fieldset>

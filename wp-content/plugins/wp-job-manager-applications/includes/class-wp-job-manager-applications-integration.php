@@ -14,14 +14,16 @@ class WP_Job_Manager_Applications_Integration {
 	 * Constructor
 	 */
 	public function __construct() {
-		// Integrate apply with linkedin and XING if forms are enabled
+		// Integrate apply with LinkedIn, XING and/or Facebook if forms are enabled
 		if ( get_option( 'job_application_form_for_url_method', '1' ) ) {
 			add_filter( 'wp_job_manager_apply_with_linkedin_enable_http_post', '__return_true' );
 			add_filter( 'wp_job_manager_apply_with_xing_enable_http_post', '__return_true' );
+			add_filter( 'wp_job_manager_apply_with_facebook_enable_http_post', '__return_true' );
 		}
 
 		add_action( 'wp_job_manager_apply_with_linkedin_application', array( $this, 'handle_apply_with_linkedin' ), 10, 3 );
 		add_action( 'wp_job_manager_apply_with_xing_application', array( $this, 'handle_apply_with_xing' ), 10, 3 );
+		add_action( 'wp_job_manager_apply_with_facebook_application', array( $this, 'handle_apply_with_facebook' ), 10, 4 );
 
 		// Integrate with Resume Manager's apply form
 		add_action( 'applied_with_resume', array( $this, 'handle_applied_with_resume' ), 10, 5 );
@@ -94,6 +96,33 @@ class WP_Job_Manager_Applications_Integration {
 		// Add meta data from submitted profile
 		$application_meta[ __( 'Location', 'wp-job-manager-applications' ) ]     = $location;
 		$application_meta[ __( 'Full Profile', 'wp-job-manager-applications' ) ] = $profile_data->permalink;
+
+		create_job_application( $job_id, $candidate_name, $candidate_email, $application_message, $application_meta, false );
+	}
+
+	/**
+	 * Handle an application from Facebook
+	 * @param  array $application
+	 */
+	public function handle_apply_with_facebook( $job_id, $profile_data, $profile_picture, $cover_letter ) {
+		if ( ! $job_id || empty( $profile_data ) ) {
+			return;
+		}
+
+		$candidate_name      = $profile_data->name;
+		$candidate_email     = $profile_data->email;
+		$application_message = $cover_letter;
+		$application_meta    = array();
+
+		if ( ! $application_message ) {
+			$application_message = $profile_data->bio;
+		} else {
+			$application_meta[ __( 'Title', 'wp-job-manager-applications' ) ] = $profile_data->bio;
+		}
+
+		// Add meta data from submitted profile
+		$application_meta[ __( 'Location', 'wp-job-manager-applications' ) ]     = $profile_data->location->name;
+		$application_meta[ __( 'Full Profile', 'wp-job-manager-applications' ) ] = $profile_data->link;
 
 		create_job_application( $job_id, $candidate_name, $candidate_email, $application_message, $application_meta, false );
 	}

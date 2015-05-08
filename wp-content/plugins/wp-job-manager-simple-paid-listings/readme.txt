@@ -1,8 +1,8 @@
 === Simple Paid Listings ===
 Contributors: mikejolley
 Requires at least: 3.8
-Tested up to: 4.0
-Stable tag: 1.1.15
+Tested up to: 4.1
+Stable tag: 1.2.0
 License: GNU General Public License v3.0
 
 Add paid listing functionality. Set a price per listing and take payment via Stripe or PayPal before the listing becomes published.
@@ -26,6 +26,9 @@ If you need help with customisation you will need to find and hire a developer c
 To install this plugin, please refer to the guide here: [http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation](http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation)
 
 == Changelog ==
+
+= 1.2.0 =
+* Job Manager 1.22.0 support
 
 = 1.1.15 =
 * Only enqueue stripe scripts when payment needs to be taken.

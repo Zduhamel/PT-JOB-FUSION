@@ -33,38 +33,42 @@
 
 /* =Global styles/layout
 -------------------------------------------------------------- */
-.resume-manager-data-row {
-	position: relative;
-	cursor: move;
-}
 .applying_for {
 	font-weight: bold;
 }
-.resume-manager-data-row .resume-manager-remove-row {
-	position: absolute;
-	right: 0;
-	top: 0;
-	height: 0;
-	margin: .5em -1.25em 0 0;
-	width: 1em;
-	padding: 1em 0 0 0;
-	overflow: hidden;
-	color: #ccc;
-	&:before {
-		content: 'x';
+
+.resume-manager-data-row {
+	position: relative;
+	cursor: move;
+	label {
+		cursor: move;
+	}
+	.resume-manager-remove-row {
 		position: absolute;
-		top:0;
-		left:0;
+		right: 0;
+		top: 0;
+		height: 0;
+		margin: .5em -1.25em 0 0;
 		width: 1em;
-		line-height: 1em;
-		text-align: center;
+		padding: 1em 0 0 0;
+		overflow: hidden;
+		color: #ccc;
+		&:before {
+			content: 'x';
+			position: absolute;
+			top:0;
+			left:0;
+			width: 1em;
+			line-height: 1em;
+			text-align: center;
+		}
+		&:hover {
+			color: red;
+		}
 	}
-	&:hover {
-		color: red;
+	fieldset:last-child {
+		border-bottom: 4px solid #eee;
 	}
-}
-.resume-manager-data-row fieldset:last-child {
-	border-bottom: 4px solid #eee;
 }
 .resume_preview {
 	padding: 0 1em 1em;

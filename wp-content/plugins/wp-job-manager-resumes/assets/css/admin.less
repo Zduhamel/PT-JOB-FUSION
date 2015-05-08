@@ -25,7 +25,7 @@
 		text-align: left;
 		padding-left: 11px;
 	}
-	th.column-featured_resume {
+	th.column-featured_resume, th.column-resume_status {
 		width: 1em;
 		span {
 			display: block;
@@ -38,6 +38,51 @@
 				content: '\e803';
 				.jm-icon;
 			}
+		}
+	}
+	th.column-resume_status {
+		span {
+			&:before {
+				content: '\e828';
+			}
+		}
+	}
+	td.column-resume_status {
+		span {
+			position: relative;
+			font-size: 1em;
+			line-height: 1.5em;
+			width: 1em;
+			height: 0;
+			padding: 2em 0 0 0;
+			overflow: hidden;
+			display: block;
+		}
+		span:before {
+			.jm-icon;
+			position: absolute;
+			top: 0;
+			left: 0;
+			line-height: 1.5em;
+			vertical-align: middle;
+			color: #999;
+			content: '\e829';
+		}
+		.status-trash:before {
+			content: '\e82b';
+			color: #a00;
+		}
+		.status-pending:before {
+			content: '\e82c';
+			color: #ffba00;
+		}
+		.status-publish:before {
+			content: '\e82f';
+			color: #73a724;
+		}
+		.status-expired:before {
+			content: '\e82e';
+			color: #a00;
 		}
 	}
 	.column-resume_posted {
@@ -54,7 +99,7 @@
 		width: 11%;
 	}
 	th.column-candidate {
-		width: 18%;
+		width: 20%;
 	}
 	td.column-candidate {
 		padding-right: 50px !important;
@@ -82,21 +127,13 @@
 	}
 	.column-candidate_location {
 		width: 11%;
-		a:before {
-			.display-icon;
-			content: '\e81d';
-		}
 	}
 	.column-candidate_email {
 		width: 9%;
-		a:before {
-			.display-icon;
-			content: '\e81c';
-		}
 	}
 	.column-resume_actions {
 		text-align: right;
-		width: 104px;
+		width: 160px;
 		strong {
 			display: block;
 			margin-bottom: .2em;
@@ -133,72 +170,60 @@
 		.icon-approve:before {
 			content: '\e802';
 		}
+		.icon-email:before {
+			content: '\e81c';
+		}
 	}
 }
-.wp_job_manager_meta_data {
-	p {
-		overflow: hidden;
-		margin: 0 0 1em;
-		padding: 0 0 0 20%;
-		position: relative;
-		line-height: 2em;
+table.wc-job-manager-resumes-repeated-rows {
+	border-color: #dfdfdf;
+	background-color: #f9f9f9;
+	margin: 0;
+	width: 100%;
+	border-width: 1px;
+	border-style: solid;
+	border-collapse: separate;
+	border-spacing: 0;
+	thead {
+		th {
+			padding: 5px 8px 8px;
+			background-color: #f1f1f1;
+		}
 	}
-	label {
-		width: 20%;
-		position: absolute;
-		left: 0;
-		vertical-align: middle;
-	}
-	input {
-		width: 50%;
-		margin: 1px 0;
-		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-		box-sizing: border-box;         /* Opera/IE 8+ */
-		vertical-align: middle;
-	}
-	input.checkbox {
-		width: auto;
-		margin: 4px 2px;
-	}
-}
-#resume_url_data, #resume_education_data, #resume_experience_data {
-	table {
-		border-color: #dfdfdf;
-		background-color: #f9f9f9;
-		margin: 0;
-		width: 100%;
-		border-width: 1px;
-		border-style: solid;
-		border-collapse: separate;
-		border-spacing: 0;
-		thead {
-			th {
-				padding: 5px 8px 8px;
-				background-color: #f1f1f1;
+	tbody {
+		td.left {
+			width: 38%;
+		}
+		td.sort-column {
+			cursor: move;
+			color: #ccc;
+			&:before {
+				content: "\f333";
+				font-family: 'dashicons';
 			}
 		}
-		tbody {
-			td.left {
-				width: 38%;
+		td {
+			padding: 8px 0 0 8px;
+			vertical-align: middle;
+			input, textarea {
+				width: 100%;
 			}
-			td {
-				padding: 8px 0 0 8px;
-				vertical-align: top;
-				input, textarea {
-					width: 100%;
-				}
-				&:last-child {
-					padding-right: 8px;
-				}
+			&:last-child {
+				padding-right: 8px;
+			}
+			label {
+				display: none;
+			}
+			p {
+				margin:0;
 			}
 		}
-		tfoot {
-			.submit {
-				border: 0 none;
-				float: none !important;
-				padding: 8px !important;
-			}
+	}
+	tfoot {
+		.submit {
+			border: 0 none;
+			float: none !important;
+			padding: 8px !important;
 		}
 	}
 }

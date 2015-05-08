@@ -26,17 +26,17 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 	public static function resume_fields() {
 		$fields = apply_filters( 'resume_manager_resume_fields', array(
 			'_candidate_title' => array(
-				'label'       => __( 'Professional title', 'wp-job-manager-resumes' ),
+				'label'       => __( 'Professional Title', 'wp-job-manager-resumes' ),
 				'placeholder' => '',
 				'description' => ''
 			),
 			'_candidate_email' => array(
-				'label'       => __( 'Contact email', 'wp-job-manager-resumes' ),
+				'label'       => __( 'Contact Email', 'wp-job-manager-resumes' ),
 				'placeholder' => __( 'you@yourdomain.com', 'wp-job-manager-resumes' ),
 				'description' => ''
 			),
 			'_candidate_location' => array(
-				'label'       => __( 'Candidate location', 'wp-job-manager-resumes' ),
+				'label'       => __( 'Candidate Location', 'wp-job-manager-resumes' ),
 				'placeholder' => __( 'e.g. "London, UK", "New York", "Houston, TX"', 'wp-job-manager-resumes' ),
 				'description' => ''
 			),
@@ -51,7 +51,7 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 				'type'        => 'text'
 			),
 			'_resume_file' => array(
-				'label'       => __( 'Resume file', 'wp-job-manager-resumes' ),
+				'label'       => __( 'Resume File', 'wp-job-manager-resumes' ),
 				'placeholder' => __( 'URL to the candidate\'s resume file', 'wp-job-manager-resumes' ),
 				'type'        => 'file'
 			),
@@ -60,7 +60,7 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 				'type'  => 'author'
 			),
 			'_featured' => array(
-				'label' => __( 'Feature this resume?', 'wp-job-manager-resumes' ),
+				'label' => __( 'Feature this Resume?', 'wp-job-manager-resumes' ),
 				'type'  => 'checkbox',
 				'description' => __( 'Featured resumes will be sticky during searches, and can be styled differently.', 'wp-job-manager-resumes' )
 			),
@@ -118,28 +118,39 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 	}
 
 	/**
-	 * Resume URL data
-	 *
-	 * @param mixed $post
+	 * Output repeated rows
 	 */
-	public function url_data( $post ) {
-		echo '<p>' . __( 'Optionally provide links to any of your websites or social network profiles.', 'wp-job-manager-resumes' ) . '</p>';
+	private function repeated_rows_html( $group_name, $fields, $data ) {
 		?>
-		<table>
+		<table class="wc-job-manager-resumes-repeated-rows">
 			<thead>
 				<tr>
-					<th class="left"><label><?php _e( 'Name', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'URL', 'wp-job-manager-resumes' ); ?></label></th>
+					<th class="sort-column">&nbsp;</th>
+					<?php foreach ( $fields as $field ) : ?>
+						<th><label><?php echo esc_html( $field['label'] ); ?></label></th>
+					<?php endforeach; ?>
 				</tr>
 			</thead>
 			<tfoot>
 				<tr>
-					<td colspan="2">
+					<td colspan="<?php echo sizeof( $fields ) + 1; ?>">
 						<div class="submit">
-							<input type="submit" class="button resume_manager_add_row" value="<?php _e( 'Add URL', 'wp-job-manager-resumes' ); ?>" data-row="<?php
+							<input type="submit" class="button resume_manager_add_row" value="<?php printf( __( 'Add %s', 'wp-job-manager-resumes' ), $group_name ); ?>" data-row="<?php
 								ob_start();
-								$name = $url = '';
-								include( 'views/html-url-row.php' );
+								echo '<tr>';
+								foreach ( $fields as $key => $field ) {
+									echo '<td>';
+									$type           = ! empty( $field['type'] ) ? $field['type'] : 'text';
+									$field['value'] = '';
+
+									if ( method_exists( $this, 'input_' . $type ) ) {
+										call_user_func( array( $this, 'input_' . $type ), $key, $field );
+									} else {
+										do_action( 'resume_manager_input_' . $type, $key, $field );
+									}
+									echo '</td>';
+								}
+								echo '</tr>';
 								echo esc_attr( ob_get_clean() );
 							?>" />
 						</div>
@@ -148,19 +159,132 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 			</tfoot>
 			<tbody>
 				<?php
-					$items = get_post_meta( $post->ID, '_links', true );
+					if ( $data ) {
+						foreach ( $data as $item ) {
+							echo '<tr>';
+							echo '<td class="sort-column" width="1%">&nbsp;</td>';
+							foreach ( $fields as $key => $field ) {
+								echo '<td>';
+								$type           = ! empty( $field['type'] ) ? $field['type'] : 'text';
+								$field['value'] = isset( $item[ $key ] ) ? $item[ $key ] : '';
 
-					if ( $items ) {
-						foreach ( $items as $item ) {
-							$name = $item['name'];
-							$url  = $item['url'];
-							include( 'views/html-url-row.php' );
+								if ( method_exists( $this, 'input_' . $type ) ) {
+									call_user_func( array( $this, 'input_' . $type ), $key, $field );
+								} else {
+									do_action( 'resume_manager_input_' . $type, $key, $field );
+								}
+								echo '</td>';
+							}
+							echo '</tr>';
 						}
 					}
 				?>
 			</tbody>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Resume fields
+	 * @return array
+	 */
+	public static function resume_links_fields() {
+		return apply_filters( 'resume_manager_resume_links_fields', array(
+			'name' => array(
+				'label'       => __( 'Name', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_url_name[]',
+				'placeholder' => __( 'Your site', 'wp-job-manager-resumes' ),
+				'description' => '',
+				'required'    => true
+			),
+			'url' => array(
+				'label'       => __( 'URL', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_url[]',
+				'placeholder' => 'http://',
+				'description' => '',
+				'required'    => true
+			)
+		) );
+	}
+
+	/**
+	 * Resume fields
+	 * @return array
+	 */
+	public static function resume_education_fields() {
+		return apply_filters( 'resume_manager_resume_education_fields', array(
+			'location' => array(
+				'label'       => __( 'School name', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_education_location[]',
+				'placeholder' => '',
+				'description' => '',
+				'required'    => true
+			),
+			'qualification' => array(
+				'label'       => __( 'Qualification(s)', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_education_qualification[]',
+				'placeholder' => '',
+				'description' => ''
+			),
+			'date' => array(
+				'label'       => __( 'Start/end date', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_education_date[]',
+				'placeholder' => '',
+				'description' => ''
+			),
+			'notes' => array(
+				'label'       => __( 'Notes', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_education_notes[]',
+				'placeholder' => '',
+				'description' => '',
+				'type'        => 'textarea',
+			)
+		) );
+	}
+
+	/**
+	 * Resume fields
+	 * @return array
+	 */
+	public static function resume_experience_fields() {
+		return apply_filters( 'resume_manager_resume_experience_fields', array(
+			'employer' => array(
+				'label'       => __( 'Employer', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_experience_employer[]',
+				'placeholder' => '',
+				'description' => '',
+				'required'    => true
+			),
+			'job_title' => array(
+				'label'       => __( 'Job Title', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_experience_job_title[]',
+				'placeholder' => '',
+				'description' => ''
+			),
+			'date' => array(
+				'label'       => __( 'Start/end date', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_experience_date[]',
+				'placeholder' => '',
+				'description' => ''
+			),
+			'notes' => array(
+				'label'       => __( 'Notes', 'wp-job-manager-resumes' ),
+				'name'        => 'resume_experience_notes[]',
+				'placeholder' => '',
+				'description' => '',
+				'type'        => 'textarea',
+			)
+		) );
+	}
+
+	/**
+	 * Resume URL data
+	 * @param mixed $post
+	 */
+	public function url_data( $post ) {
+		echo '<p>' . __( 'Optionally provide links to any of your websites or social network profiles.', 'wp-job-manager-resumes' ) . '</p>';
+		$fields = $this->resume_links_fields();
+		$this->repeated_rows_html( __( 'URL', 'wp-job-manager-resumes' ), $fields, get_post_meta( $post->ID, '_links', true ) );
 	}
 
 	/**
@@ -169,47 +293,8 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 	 * @param mixed $post
 	 */
 	public function education_data( $post ) {
-		?>
-		<table>
-			<thead>
-				<tr>
-					<th class="left"><label><?php _e( 'School name', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Qualification(s)', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Start/end date', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Notes', 'wp-job-manager-resumes' ); ?></label></th>
-				</tr>
-			</thead>
-			<tfoot>
-				<tr>
-					<td colspan="4">
-						<div class="submit">
-							<input type="submit" class="button resume_manager_add_row" value="<?php _e( 'Add Education', 'wp-job-manager-resumes' ); ?>" data-row="<?php
-								ob_start();
-								$location = $date = $qualification = $notes = '';
-								include( 'views/html-education-row.php' );
-								echo esc_attr( ob_get_clean() );
-							?>" />
-						</div>
-					</td>
-				</tr>
-			</tfoot>
-			<tbody>
-				<?php
-					$items = get_post_meta( $post->ID, '_candidate_education', true );
-
-					if ( $items ) {
-						foreach ( $items as $item ) {
-							$location      = $item['location'];
-							$date          = $item['date'];
-							$qualification = $item['qualification'];
-							$notes         = $item['notes'];
-							include( 'views/html-education-row.php' );
-						}
-					}
-				?>
-			</tbody>
-		</table>
-		<?php
+		$fields = $this->resume_education_fields();
+		$this->repeated_rows_html( __( 'Education', 'wp-job-manager-resumes' ), $fields, get_post_meta( $post->ID, '_candidate_education', true ) );
 	}
 
 	/**
@@ -218,47 +303,8 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 	 * @param mixed $post
 	 */
 	public function experience_data( $post ) {
-		?>
-		<table>
-			<thead>
-				<tr>
-					<th class="left"><label><?php _e( 'Employer', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Job Title', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Start/end date', 'wp-job-manager-resumes' ); ?></label></th>
-					<th><label><?php _e( 'Notes', 'wp-job-manager-resumes' ); ?></label></th>
-				</tr>
-			</thead>
-			<tfoot>
-				<tr>
-					<td colspan="4">
-						<div class="submit">
-							<input type="submit" class="button resume_manager_add_row" value="<?php _e( 'Add Experience', 'wp-job-manager-resumes' ); ?>" data-row="<?php
-								ob_start();
-								$employer = $date = $job_title = $notes = '';
-								include( 'views/html-experience-row.php' );
-								echo esc_attr( ob_get_clean() );
-							?>" />
-						</div>
-					</td>
-				</tr>
-			</tfoot>
-			<tbody>
-				<?php
-					$items = get_post_meta( $post->ID, '_candidate_experience', true );
-
-					if ( $items ) {
-						foreach ( $items as $item ) {
-							$employer  = $item['employer'];
-							$date      = $item['date'];
-							$job_title = $item['job_title'];
-							$notes     = $item['notes'];
-							include( 'views/html-experience-row.php' );
-						}
-					}
-				?>
-			</tbody>
-		</table>
-		<?php
+		$fields = $this->resume_experience_fields();
+		$this->repeated_rows_html( __( 'Experience', 'wp-job-manager-resumes' ), $fields, get_post_meta( $post->ID, '_candidate_experience', true ) );
 	}
 
 	/**
@@ -341,61 +387,44 @@ class WP_Resume_Manager_Writepanels extends WP_Job_Manager_Writepanels {
 			}
 		}
 
-		// Education
-		$candidate_education = array();
-		$locations           = isset( $_POST['resume_education_location'] ) ? $_POST['resume_education_location'] : array();
-		$qualifications      = isset( $_POST['resume_education_qualification'] ) ? $_POST['resume_education_qualification'] : array();
-		$dates               = isset( $_POST['resume_education_date'] ) ? $_POST['resume_education_date'] : array();
-		$notes               = isset( $_POST['resume_education_notes'] ) ? $_POST['resume_education_notes'] : array();
+		$save_repeated_fields = array(
+			'_links'                => $this->resume_links_fields(),
+			'_candidate_education'  => $this->resume_education_fields(),
+			'_candidate_experience' => $this->resume_experience_fields()
+		);
 
-		foreach ( $locations as $index => $location ) {
-			if ( ! empty( $location ) && ! empty( $qualifications[ $index ] ) && ! empty( $dates[ $index ] ) ) {
-				$candidate_education[] = array(
-					'location'      => sanitize_text_field( stripslashes( $location ) ),
-					'qualification' => sanitize_text_field( stripslashes( $qualifications[ $index ] ) ),
-					'date'          => sanitize_text_field( stripslashes( $dates[ $index ] ) ),
-					'notes'         => wp_kses_post( stripslashes( $notes[ $index ] ) )
-				);
+		foreach ( $save_repeated_fields as $meta_key => $fields ) {
+			$items            = array();
+			$first_field      = current( $fields );
+			$first_field_name = str_replace( '[]', '', $first_field['name'] );
+
+			if ( ! empty( $_POST[ $first_field_name ] ) && is_array( $_POST[ $first_field_name ] ) ) {
+				$keys = array_keys( $_POST[ $first_field_name ] );
+				foreach ( $keys as $posted_key ) {
+					$item = array();
+					foreach ( $fields as $key => $field ) {
+						$input_name   = str_replace( '[]', '', $field['name'] );
+						switch ( $field['type'] ) {
+							case 'textarea' :
+								$item[ $key ] = wp_kses_post( stripslashes( $_POST[ $input_name ][ $posted_key ] ) );
+							break;
+							default :
+								if ( is_array( $_POST[ $input_name ][ $posted_key ] ) ) {
+									$item[ $key ] = array_filter( array_map( 'sanitize_text_field', array_map( 'stripslashes', $_POST[ $input_name ][ $posted_key ] ) ) );
+								} else {
+									$item[ $key ] = sanitize_text_field( stripslashes( $_POST[ $input_name ][ $posted_key ] ) );
+								}
+							break;
+						}
+						if ( empty( $item[ $key ] ) && ! empty( $field['required'] ) ) {
+							continue 2;
+						}
+					}
+					$items[] = $item;
+				}
 			}
+			update_post_meta( $post_id, $meta_key, $items );
 		}
-
-		update_post_meta( $post_id, '_candidate_education', $candidate_education );
-
-		// Education
-		$candidate_experience = array();
-		$employers            = isset( $_POST['resume_experience_employer'] ) ? $_POST['resume_experience_employer'] : array();
-		$job_titles           = isset( $_POST['resume_experience_job_title'] ) ? $_POST['resume_experience_job_title'] : array();
-		$dates                = isset( $_POST['resume_experience_date'] ) ? $_POST['resume_experience_date'] : array();
-		$notes                = isset( $_POST['resume_experience_notes'] ) ? $_POST['resume_experience_notes'] : array();
-
-		foreach ( $employers as $index => $employer ) {
-			if ( ! empty( $employer ) && ! empty( $job_titles[ $index ] ) && ! empty( $dates[ $index ] ) ) {
-				$candidate_experience[] = array(
-					'employer'  => sanitize_text_field( stripslashes( $employer ) ),
-					'job_title' => sanitize_text_field( stripslashes( $job_titles[ $index ] ) ),
-					'date'      => sanitize_text_field( stripslashes( $dates[ $index ] ) ),
-					'notes'     => wp_kses_post( stripslashes( $notes[ $index ] ) )
-				);
-			}
-		}
-
-		update_post_meta( $post_id, '_candidate_experience', $candidate_experience );
-
-		// URLS
-		$links            = array();
-		$resume_url_names = isset( $_POST['resume_url_name'] ) ? $_POST['resume_url_name'] : array();
-		$resume_urls      = isset( $_POST['resume_url'] ) ? $_POST['resume_url'] : array();
-
-		foreach ( $resume_url_names as $index => $name ) {
-			if ( ! empty( $name ) && ! empty( $resume_urls[ $index ] ) ) {
-				$links[] = array(
-					'name' => sanitize_text_field( stripslashes( $name ) ),
-					'url'  => sanitize_text_field( stripslashes( $resume_urls[ $index ] ) )
-				);
-			}
-		}
-
-		update_post_meta( $post_id, '_links', $links );
 	}
 }
 

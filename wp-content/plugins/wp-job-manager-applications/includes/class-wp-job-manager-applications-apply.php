@@ -7,9 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WP_Job_Manager_Applications_Apply {
 
-	private $fields  = array();
-	private $error   = "";
-	private $message = "";
+	private $fields     = array();
+	private $error      = '';
+	private static $secret_dir = '';
 
 	/**
 	 * Constructor
@@ -20,6 +20,7 @@ class WP_Job_Manager_Applications_Apply {
 		add_action( 'init', array( $this, 'init' ), 20 );
 		add_action( 'wp', array( $this, 'application_form_handler' ) );
 		add_filter( 'job_manager_locate_template', array( $this, 'disable_application_form' ), 10, 2 );
+		self::$secret_dir = uniqid();
 	}
 
 	/**
@@ -30,7 +31,6 @@ class WP_Job_Manager_Applications_Apply {
 	 */
 	public function frontend_scripts() {
 		wp_register_script( 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_URL . '/assets/js/application.min.js', array( 'jquery' ), JOB_MANAGER_APPLICATIONS_VERSION, true );
-
 		wp_localize_script( 'wp-job-manager-applications', 'job_manager_applications', array(
 			'i18n_required' => __( '"%s" is a required field', 'wp-job-manager-applications' )
 		) );
@@ -72,6 +72,27 @@ class WP_Job_Manager_Applications_Apply {
 		}
 	}
 
+	public function get_fields() {
+		$this->init_fields();
+		return $this->fields;
+	}
+
+	/**
+	 * Sanitize a text field, but preserve the line breaks! Can handle arrays.
+	 * @param  string $input
+	 * @return string
+	 */
+	private function sanitize_text_field_with_linebreaks( $input ) {
+		if ( is_array( $input ) ) {
+			foreach ( $input as $k => $v ) {
+				$input[ $k ] = $this->sanitize_text_field_with_linebreaks( $v );
+			}
+			return $input;
+		} else {
+			return str_replace( '[nl]', "\n", sanitize_text_field( str_replace( "\n", '[nl]', strip_tags( stripslashes( $input ) ) ) ) );
+		}
+	}
+
 	/**
 	 * Init form fields
 	 */
@@ -80,90 +101,72 @@ class WP_Job_Manager_Applications_Apply {
 			return;
 		}
 
-		if ( is_user_logged_in() ) {
-			// Resume manager integration
-			if ( function_exists( 'get_resume_share_link' ) ) {
-				$args = apply_filters( 'resume_manager_get_application_form_resumes_args', array(
-					'post_type'           => 'resume',
-					'post_status'         => array( 'publish', 'pending', 'hidden' ),
-					'ignore_sticky_posts' => 1,
-					'posts_per_page'      => -1,
-					'orderby'             => 'date',
-					'order'               => 'desc',
-					'author'              => get_current_user_id()
-				) );
+		$current_user = is_user_logged_in() ? wp_get_current_user() : false;
+		$this->fields = get_job_application_form_fields();
 
-				$resumes      = array();
-				$resume_posts = get_posts( $args );
-				foreach ( $resume_posts as $resume ) {
-					$resumes[ $resume->ID ] = $resume->post_title;
+		// Handle values
+		foreach ( $this->fields as $key => $field ) {
+			if ( ! isset( $this->fields[ $key ]['value'] ) ) {
+				$this->fields[ $key ]['value'] = '';
+			}
+
+			$field['rules'] = array_filter( (array) $field['rules'] );
+
+			// Special field type handling
+			if ( in_array( 'from_name', $field['rules'] ) ) {
+				if ( $current_user ) {
+					$this->fields[ $key ]['value'] = $current_user->first_name . ' ' . $current_user->last_name;
 				}
-			} else {
-				$resumes         = null;
 			}
-			$user            = wp_get_current_user();
-			$candidate_name  = $user->first_name . ' ' . $user->last_name;
-			$candidate_email = $user->user_email;
-		} else {
-			$resumes         = null;
-			$candidate_name  = '';
-			$candidate_email = '';
-		}
-
-		$this->fields = array(
-			'candidate_name' => array(
-				'label'       => __( 'Full name', 'wp-job-manager-applications' ),
-				'type'        => 'text',
-				'required'    => true,
-				'placeholder' => '',
-				'priority'    => 1,
-				'value'       => isset( $_POST['candidate_name'] ) ? sanitize_text_field( $_POST['candidate_name'] ) : $candidate_name
-			),
-			'candidate_email' => array(
-				'label'       => __( 'Email address', 'wp-job-manager-applications' ),
-				'description' => '',
-				'type'        => 'text',
-				'required'    => true,
-				'placeholder' => '',
-				'priority'    => 2,
-				'value'       => isset( $_POST['candidate_email'] ) ? sanitize_text_field( $_POST['candidate_email'] ) : $candidate_email
-			),
-			'application_message' => array(
-				'label'       => __( 'Message', 'wp-job-manager-applications' ),
-				'type'        => 'textarea',
-				'required'    => true,
-				'placeholder' => __( 'Your cover letter/message sent to the employer', 'wp-job-manager-applications' ),
-				'priority'    => 3,
-				'value'       => isset( $_POST['application_message'] ) ? str_replace( '[nl]', "\n", sanitize_text_field( str_replace( "\n", '[nl]', strip_tags( stripslashes( $_POST['application_message'] ) ) ) ) ) : ''
-			),
-			'application_attachment' => array(
-				'label'       => __( 'Upload CV', 'wp-job-manager-applications' ),
-				'type'        => 'file',
-				'required'    => true,
-				'priority'    => 5,
-				'placeholder' => '',
-				'multiple'    => true,
-				'description' => sprintf( __( '          ', 'wp-job-manager-applications' ), size_format( wp_max_upload_size() ) )
-			)
-		);
-
-		if ( sizeof( $resumes ) ) {
-			$this->fields['resume_id'] = array(
-				'label'       => __( 'Online Resume', 'wp-job-manager-applications' ),
-				'description' => '',
-				'type'        => 'select',
-				'required'    => false,
-				'options'     => array( '0' => __( 'N/A', 'wp-job-manager-applications' ) ) + $resumes,
-				'priority'    => 4
-			);
-			if ( isset( $this->fields['application_attachment'] ) ) {
-				$this->fields['application_attachment']['required'] = false;
+			if ( in_array( 'from_email', $field['rules'] ) ) {
+				if ( $current_user ) {
+					$this->fields[ $key ]['value'] = $current_user->user_email;
+				}
 			}
-		}
+			if ( 'select' === $field['type'] && ! $this->fields[ $key ]['required'] ) {
+				$this->fields[ $key ]['options'] = array_merge( array( 0 => __( 'Choose an option', 'wp-job-manager-applications' ) ), $this->fields[ $key ]['options'] );
+			}
+			if ( 'resumes' === $field['type'] ) {
+				if ( function_exists( 'get_resume_share_link' ) && is_user_logged_in() ) {
+					$args = apply_filters( 'resume_manager_get_application_form_resumes_args', array(
+						'post_type'           => 'resume',
+						'post_status'         => array( 'publish', 'pending', 'hidden' ),
+						'ignore_sticky_posts' => 1,
+						'posts_per_page'      => -1,
+						'orderby'             => 'date',
+						'order'               => 'desc',
+						'author'              => get_current_user_id()
+					) );
+					$resumes      = array( 0 => __( 'Choose an online resume...', 'wp-job-manager-applications' ) );
+					$resume_posts = get_posts( $args );
+					foreach ( $resume_posts as $resume ) {
+						$resumes[ $resume->ID ] = $resume->post_title;
+					}
+				} else {
+					$resumes = null;
+				}
 
-		$this->fields = apply_filters( 'job_application_form_fields', $this->fields );
+				if ( ! $resumes || sizeof( $resumes ) < 2 ) {
+					unset( $this->fields[ $key ] );
+					continue;
+				}
+
+				$this->fields[ $key ]['type']    = 'select';
+				$this->fields[ $key ]['options'] = $resumes;
+			}
+
+			// Check for already posted values
+			$this->fields[ $key ]['value'] = isset( $_POST[ $key ] ) ? $this->sanitize_text_field_with_linebreaks( $_POST[ $key ] ) : $this->fields[ $key ]['value'];
+		}
 
 		uasort( $this->fields, array( $this, 'sort_by_priority' ) );
+	}
+
+	/**
+	 * Get a field from either resume manager or job manager
+	 */
+	public static function get_field_template( $key, $field ) {
+		get_job_manager_template( 'form-fields/' . $field['type'] . '-field.php', array( 'key' => $key, 'field' => $field ) );
 	}
 
 	/**
@@ -172,7 +175,7 @@ class WP_Job_Manager_Applications_Apply {
 	public function disable_application_form( $template, $template_name ) {
 		global $post;
 
-		if ( 'job-application.php' === $template_name && get_option( 'job_application_prevent_multiple_applications' ) && is_user_logged_in() && user_has_applied_for_job( get_current_user_id(), $post->ID ) ) {
+		if ( 'job-application.php' === $template_name && get_option( 'job_application_prevent_multiple_applications' ) && user_has_applied_for_job( get_current_user_id(), $post->ID ) ) {
 			return locate_job_manager_template( 'application-form-applied.php', 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_DIR . '/templates/' );
 		}
 		return $template;
@@ -190,8 +193,7 @@ class WP_Job_Manager_Applications_Apply {
 
 			wp_enqueue_script( 'wp-job-manager-applications' );
 
-			// Application form
-			get_job_manager_template( 'application-form.php', array( 'application_fields' => $this->fields ), 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_DIR . '/templates/' );
+			get_job_manager_template( 'application-form.php', array( 'application_fields' => $this->fields, 'class' => $this ), 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_DIR . '/templates/' );
 		}
 	}
 
@@ -207,11 +209,8 @@ class WP_Job_Manager_Applications_Apply {
 	 */
 	public function application_form_handler() {
 		if ( ! empty( $_POST['wp_job_manager_send_application'] ) ) {
-			$this->init_fields();
-
-			add_action( 'job_content_start', array( $this, 'application_form_result' ) );
-
 			try {
+				$fields = get_job_application_form_fields();
 				$values = array();
 				$job_id = absint( $_POST['job_id'] );
 				$job    = get_post( $job_id );
@@ -221,21 +220,24 @@ class WP_Job_Manager_Applications_Apply {
 					throw new Exception( __( 'Invalid job', 'wp-job-manager-applications' ) );
 				}
 
+				if ( get_option( 'job_application_prevent_multiple_applications' ) && user_has_applied_for_job( get_current_user_id(), $job_id ) ) {
+					throw new Exception( __( 'You have already applied for this job', 'wp-job-manager-applications' ) );
+				}
+
 				// Validate posted fields
-				foreach ( $this->fields as $key => $field ) {
-					// Get fields
+				foreach ( $fields as $key => $field ) {
+					$field['rules'] = array_filter( (array) $field['rules'] );
+
 					switch( $field['type'] ) {
-						case "textarea" :
-							$values[ $key ] = isset( $_POST[ $key ] ) ? str_replace( '[nl]', "\n", sanitize_text_field( str_replace( "\n", '[nl]', strip_tags( stripslashes( $_POST[ $key ] ) ) ) ) ) : '';
-						break;
 						case "file" :
 							$values[ $key ] = $this->upload_file( $key, $field );
-						break;
-						case "multiselect" :
-							$values[ $key ] = isset( $_POST[ $key ] ) ? array_map( 'sanitize_text_field', $_POST[ $key ] ) : '';
+
+							if ( is_wp_error( $values[ $key ] ) ) {
+								throw new Exception( $field['label'] . ': ' . $values[ $key ]->get_error_message() );
+							}
 						break;
 						default :
-							$values[ $key ] = isset( $_POST[ $key ] ) ? sanitize_text_field( $_POST[ $key ] ) : '';
+							$values[ $key ] = isset( $_POST[ $key ] ) ? $this->sanitize_text_field_with_linebreaks( $_POST[ $key ] ) : '';
 						break;
 					}
 
@@ -244,135 +246,183 @@ class WP_Job_Manager_Applications_Apply {
 						throw new Exception( sprintf( __( '"%s" is a required field', 'wp-job-manager-applications' ), $field['label'] ) );
 					}
 
-					// Errprs
-					if ( is_wp_error( $values[ $key ] ) ) {
-						throw new Exception( $field['label'] . ': ' . $values[ $key ]->get_error_message() );
-					}
-
 					// Extra validation rules
-					switch( $key ) {
-						case 'candidate_email' :
-							if ( empty( $values[ $key ] ) || ! is_email( $values[ $key ] ) ) {
-								throw new Exception( __( 'Please provide a valid email address', 'wp-job-manager-applications' ) );
+					if ( ! empty( $field['rules'] ) && ! empty( $values[ $key ] ) ) {
+						foreach( $field['rules'] as $rule ) {
+							switch( $rule ) {
+								case 'email' :
+								case 'from_email' :
+									if ( ! is_email( $values[ $key ] ) ) {
+										throw new Exception( $field['label'] . ': ' . __( 'Please provide a valid email address', 'wp-job-manager-applications' ) );
+									}
+								break;
+								case 'numeric' :
+									if ( ! is_numeric( $values[ $key ] ) ) {
+										throw new Exception( $field['label'] . ': ' . __( 'Please enter a number', 'wp-job-manager-applications' ) );
+									}
+								break;
 							}
-						break;
+						}
 					}
 				}
 
 				// Validation hook
-				$valid = apply_filters( 'application_form_validate_fields', true, $this->fields, $values );
+				$valid = apply_filters( 'application_form_validate_fields', true, $fields, $values );
 
 				if ( is_wp_error( $valid ) ) {
 					throw new Exception( $valid->get_error_message() );
 				}
 
 				// Prepare meta data to save
-				if ( ! empty( $values[ 'application_attachment' ] ) ) {
-					foreach ( $values[ 'application_attachment' ] as $attachment ) {
-						if ( ! is_wp_error( $attachment ) ) {
-							if ( 1 === sizeof( $values[ 'application_attachment' ] ) ) {
-								$meta['_attachment']      = $attachment['url'];
-								$meta['_attachment_file'] = $attachment['file'];
-							} else {
-								$meta['_attachment'][]      = $attachment['url'];
-								$meta['_attachment_file'][] = $attachment['file'];
+				$from_name                = array();
+				$from_email               = '';
+				$application_message      = array();
+				$meta['_secret_dir']      = self::$secret_dir;
+				$meta['_attachment']      = array();
+				$meta['_attachment_file'] = array();
+
+				foreach ( $fields as $key => $field ) {
+					if ( empty( $values[ $key ] ) ) {
+						continue;
+					}
+
+					$field['rules'] = array_filter( (array) $field['rules'] );
+
+					if ( in_array( 'from_name', $field['rules'] ) ) {
+						$from_name[] = $values[ $key ];
+					}
+
+					if ( in_array( 'from_email', $field['rules'] ) ) {
+						$from_email = $values[ $key ];
+					}
+
+					if ( in_array( 'message', $field['rules'] ) ) {
+						$application_message[] = $values[ $key ];
+					}
+
+					if ( 'file' === $field['type'] ) {
+						if ( ! empty( $values[ $key ] ) ) {
+							$index = 1;
+							foreach ( $values[ $key ] as $attachment ) {
+								if ( ! is_wp_error( $attachment ) ) {
+									if ( in_array( 'attachment', $field['rules'] ) ) {
+										$meta['_attachment'][]      = $attachment->url;
+										$meta['_attachment_file'][] = $attachment->file;
+									} else {
+										$meta[ $field['label'] . ' ' . $index ] = $attachment->url;
+									}
+								}
+								$index ++;
 							}
 						}
 					}
+					elseif ( 'resumes' === $field['type'] ) {
+						$meta['_resume_id'] = absint( $values[ $key ] );
+					}
+					elseif ( 'checkbox' === $field['type'] ) {
+						$meta[ $field['label'] ] = $values[ $key ] ? __( 'Yes', 'wp-job-manager-applications' ) : __( 'No', 'wp-job-manager-applications' );
+					}
+					elseif ( is_array( $values[ $key ] ) ) {
+						$meta[ $field['label'] ] = implode( ', ', $values[ $key ] );
+					}
+					else {
+						$meta[ $field['label'] ] = $values[ $key ];
+					}
 				}
 
-				if ( ! empty( $values['resume_id'] ) && function_exists( 'get_resume_share_link' ) ) {
-					$meta['_resume_id'] = $values['resume_id'];
-				}
-
-				// Filter meta
-				$meta = apply_filters( 'job_application_form_posted_meta', $meta, $values );
+				$from_name           = implode( ' ', $from_name );
+				$application_message = implode( "\n\n", $application_message );
+				$meta                = apply_filters( 'job_application_form_posted_meta', $meta, $values );
 
 				// Create application
-				if ( ! $application_id = create_job_application( $job_id, $values['candidate_name'], $values['candidate_email'], $values['application_message'], $meta ) ) {
+				if ( ! $application_id = create_job_application( $job_id, $from_name, $from_email, $application_message, $meta ) ) {
 					throw new Exception( __( 'Could not create job application', 'wp-job-manager-applications' ) );
 				}
 
+				// Candidate email
+				$candidate_email_content = get_job_application_candidate_email_content();
+				if ( $candidate_email_content ) {
+					$existing_shortcode_tags = $GLOBALS['shortcode_tags'];
+					remove_all_shortcodes();
+					job_application_email_add_shortcodes( array(
+						'application_id'      => $application_id,
+						'job_id'              => $job_id,
+						'candidate_name'      => $from_name,
+						'candidate_email'     => $from_email,
+						'application_message' => $application_message,
+						'meta'                => $meta
+					) );
+					$subject = do_shortcode( get_job_application_candidate_email_subject() );
+					$message = do_shortcode( $candidate_email_content );
+					$message = str_replace( "\n\n\n\n", "\n\n", implode( "\n", array_map( 'trim', explode( "\n", $message ) ) ) );
+					$is_html = ( $message != strip_tags( $message ) );
+
+					// Does this message contain formatting already?
+					if ( $is_html && ! strstr( $message, '<p' ) && ! strstr( $message, '<br' ) ) {
+						$message = nl2br( $message );
+					}
+
+					$GLOBALS['shortcode_tags'] = $existing_shortcode_tags;
+					$headers   = array();
+					$headers[] = 'From: ' . get_bloginfo( 'name' ) . ' <noreply@' . str_replace( array( 'http://', 'https://', 'www.' ), '', site_url( '' ) ) . '>';
+					$headers[] = $is_html ? 'Content-Type: text/html' : 'Content-Type: text/plain';
+					$headers[] = 'charset=utf-8';
+
+					wp_mail(
+						apply_filters( 'create_job_application_candidate_notification_recipient', $from_email, $job_id, $application_id ),
+						apply_filters( 'create_job_application_candidate_notification_subject', $subject, $job_id, $application_id ),
+						apply_filters( 'create_job_application_candidate_notification_message', $message ),
+						apply_filters( 'create_job_application_candidate_notification_headers', $headers, $job_id, $application_id ),
+						apply_filters( 'create_job_application_candidate_notification_attachments', array(), $job_id, $application_id )
+					);
+				}
+
 				// Message to display
-				$this->message = __( 'Your job application has been submitted successfully', 'wp-job-manager-applications' );
+				add_action( 'job_content_start', array( $this, 'application_form_success' ) );
 
 				// Trigger action
 				do_action( 'new_job_application', $application_id, $job_id );
 
 			} catch ( Exception $e ) {
 				$this->error = $e->getMessage();
+				add_action( 'job_content_start', array( $this, 'application_form_errors' ) );
 			}
 		}
 	}
 
 	/**
 	 * Upload a file
-	 *
-	 * @return  array
+	 * @return  string or array
 	 */
 	public function upload_file( $field_key, $field ) {
 		if ( isset( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ]['name'] ) ) {
-			include_once( ABSPATH . 'wp-admin/includes/file.php' );
-			include_once( ABSPATH . 'wp-admin/includes/media.php' );
-
-			$file               = $_FILES[ $field_key ];
-
 			if ( ! empty( $field['allowed_mime_types'] ) ) {
 				$allowed_mime_types = $field['allowed_mime_types'];
 			} else {
 				$allowed_mime_types = get_allowed_mime_types();
 			}
 
-			if ( empty( $file['name'] ) ) {
-				return false;
-			}
+			$files           = array();
+			$files_to_upload = job_manager_prepare_uploaded_files( $_FILES[ $field_key ] );
 
-			if ( is_array( $file['name'] ) ) {
-				$file_urls = array();
+			add_filter( 'job_manager_upload_dir', array( $this, 'upload_dir' ), 10, 2 );
 
-				foreach ( $file['name'] as $key => $value ) {
-					if ( ! empty( $file['name'][ $key ] ) ) {
+			foreach ( $files_to_upload as $file_to_upload ) {
+				$uploaded_file = job_manager_upload_file( $file_to_upload, array( 'file_key' => $field_key ) );
 
-						if ( ! in_array( $file['type'][ $key ], $allowed_mime_types ) ) {
-			    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'][ $key ], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
-						}
-
-						$upload_file = array(
-							'name'     => $file['name'][ $key ],
-							'type'     => $file['type'][ $key ],
-							'tmp_name' => $file['tmp_name'][ $key ],
-							'error'    => $file['error'][ $key ],
-							'size'     => $file['size'][ $key ]
-						);
-
-						add_filter( 'upload_dir',  array( $this, 'upload_dir' ) );
-						$upload = wp_handle_upload( $upload_file, array( 'test_form' => false ) );
-						remove_filter( 'upload_dir', array( $this, 'upload_dir' ) );
-
-						if ( ! empty( $upload['error'] ) ) {
-							throw new Exception( $upload['error'] );
-						}
-
-						$file_urls[] = $upload;
-					}
-				}
-
-				return $file_urls;
-			} else {
-				if ( ! in_array( $file['type'], $allowed_mime_types ) ) {
-	    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
-				}
-
-				add_filter( 'upload_dir',  array( $this, 'upload_dir' ) );
-				$upload = wp_handle_upload( $file, array( 'test_form' => false ) );
-				remove_filter( 'upload_dir', array( $this, 'upload_dir' ) );
-
-				if ( ! empty( $upload['error'] ) ) {
-					throw new Exception( $upload['error'] );
+				if ( is_wp_error( $uploaded_file ) ) {
+					throw new Exception( $uploaded_file->get_error_message() );
 				} else {
-					return array( $upload );
+					if ( ! isset( $uploaded_file->file ) ) {
+						$uploaded_file->file = str_replace( site_url(), ABSPATH, $uploaded_file->url );
+					}
+					$files[] = $uploaded_file;
 				}
 			}
+
+			remove_filter( 'job_manager_upload_dir', array( $this, 'upload_dir' ), 10, 2 );
+
+			return $files;
 		}
 	}
 
@@ -380,28 +430,21 @@ class WP_Job_Manager_Applications_Apply {
 	 * Filter the upload directory
 	 */
 	public static function upload_dir( $pathdata ) {
-		$secret_dir = uniqid();
-
-		if ( empty( $pathdata['subdir'] ) ) {
-			$pathdata['path']   = $pathdata['path'] . '/job_applications/' . $secret_dir;
-			$pathdata['url']    = $pathdata['url']. '/job_applications/' . $secret_dir;
-			$pathdata['subdir'] = '/job_applications/' . $secret_dir;
-		} else {
-			$new_subdir         = '/job_applications/' . $secret_dir;
-			$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
-			$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
-			$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
-		}
-		return $pathdata;
+		return 'job_applications/' . self::$secret_dir;
 	}
 
 	/**
-	 * Show results - errors and messages
+	 * Success message
 	 */
-	public function application_form_result() {
-		if ( $this->message ) {
-			echo '<p class="job-manager-message">' . esc_html( $this->message ) . '</p>';
-		} elseif ( $this->error ) {
+	public function application_form_success() {
+		get_job_manager_template( 'application-submitted.php', array(), 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_DIR . '/templates/' );
+	}
+
+	/**
+	 * Show errors
+	 */
+	public function application_form_errors() {
+		if ( $this->error ) {
 			echo '<p class="job-manager-error job-manager-applications-error">' . esc_html( $this->error ) . '</p>';
 		}
 	}

@@ -15,7 +15,10 @@ class WP_Job_Manager_Applications_Admin {
 	 */
 	public function __construct() {
 		include( 'class-wp-job-manager-applications-writepanels.php' );
+		include( 'class-wp-job-manager-applications-form-editor.php' );
+		include( 'class-wp-job-manager-applications-settings.php' );
 
+		add_action( 'admin_menu', array( $this, 'admin_menu' ), 12 );
 		add_filter( 'job_manager_admin_screen_ids', array( $this, 'screen_ids' ) );
 		add_filter( 'manage_edit-job_listing_columns', array( $this, 'job_columns' ), 12 );
 		add_action( 'manage_job_listing_posts_custom_column', array( $this, 'job_custom_columns' ), 2 );
@@ -26,7 +29,19 @@ class WP_Job_Manager_Applications_Admin {
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'restrict_manage_posts' ) );
 		add_filter( 'request', array( $this, 'request' ) );
-		add_filter( "manage_edit-job_application_sortable_columns", array( $this, 'sortable_columns' ) );
+		add_filter( 'manage_edit-job_application_sortable_columns', array( $this, 'sortable_columns' ) );
+
+		$this->settings_page = new WP_Job_Manager_Applications_Settings();
+	}
+
+	/**
+	 * admin_menu function.
+	 *
+	 * @access public
+	 * @return void
+	 */
+	public function admin_menu() {
+		add_submenu_page( 'edit.php?post_type=job_application', __( 'Settings', 'wp-job-manager-applications' ), __( 'Settings', 'wp-job-manager-applications' ), 'manage_options', 'job-applications-settings', array( $this->settings_page, 'output' ) );
 	}
 
 	/**
@@ -78,8 +93,8 @@ class WP_Job_Manager_Applications_Admin {
 	 * Enqueue admin scripts
 	 */
 	public function admin_enqueue_scripts() {
-		wp_enqueue_style( 'wp-job-manager-applications-menu', JOB_MANAGER_APPLICATIONS_PLUGIN_URL . '/assets/css/menu.css' );
-		wp_enqueue_style( 'wp-job-manager-applications-admin', JOB_MANAGER_APPLICATIONS_PLUGIN_URL . '/assets/css/admin.css' );
+		wp_enqueue_style( 'wp-job-manager-applications-menu', JOB_MANAGER_APPLICATIONS_PLUGIN_URL . '/assets/css/menu.css', '', JOB_MANAGER_APPLICATIONS_VERSION );
+		wp_enqueue_style( 'wp-job-manager-applications-admin', JOB_MANAGER_APPLICATIONS_PLUGIN_URL . '/assets/css/admin.css', '', JOB_MANAGER_APPLICATIONS_VERSION );
 	}
 
 	/**

@@ -17,54 +17,6 @@ if ( class_exists( 'WP_Job_Manager_Writepanels' ) ) {
 			add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 			add_action( 'save_post', array( $this, 'save_post' ), 1, 2 );
 			add_action( 'job_manager_applications_save_job_application', array( $this, 'save_job_application_data' ), 1, 2 );
-
-			foreach ( array( 'post', 'post-new' ) as $hook ) {
-				add_action( "admin_footer-{$hook}.php", array( $this, 'extend_submitdiv_post_status' ) );
-			}
-		}
-
-	    /**
-		 * Adds post status to the "submitdiv" Meta Box and post type WP List Table screens. Based on https://gist.github.com/franz-josef-kaiser/2930190
-		 *
-		 * @return void
-		 */
-		public function extend_submitdiv_post_status() {
-			global $wp_post_statuses, $post, $post_type;
-
-			// Abort if we're on the wrong post type, but only if we got a restriction
-			if ( 'job_application' !== $post_type ) {
-				return;
-			}
-
-			// Get all non-builtin post status and add them as <option>
-			$options = $display = '';
-			foreach ( $wp_post_statuses as $status ) {
-				if ( ! $status->_builtin && in_array( $status->name, array_keys( get_job_application_statuses() ) ) ) {
-					// Match against the current posts status
-					$selected = selected( $post->post_status, $status->name, false );
-
-					// If we one of our custom post status is selected, remember it
-					$selected AND $display = $status->label;
-					$label = strip_tags( $status->label );
-
-					// Build the options
-					$options .= "<option{$selected} value='{$status->name}'>{$label}</option>";
-				}
-			}
-			?>
-			<script type="text/javascript">
-				jQuery( document ).ready( function($) {
-					<?php
-					// Add the selected post status label to the "Status: [Name] (Edit)"
-					if ( ! empty( $display ) ) {
-						?>jQuery( '#post-status-display' ).html( '<?php echo $display; ?>' );<?php
-					}
-					?>
-					var select = jQuery( '#post-status-select' ).find( 'select' );
-					jQuery( select ).append( "<?php echo $options; ?>" );
-				} );
-			</script>
-			<?php
 		}
 
 		/**
@@ -77,7 +29,7 @@ if ( class_exists( 'WP_Job_Manager_Writepanels' ) ) {
 
 			$fields = apply_filters( 'job_manager_applications_job_application_fields', array(
 				'_candidate_email' => array(
-					'label'       => __( 'Contact email', 'wp-job-manager-applications' ),
+					'label'       => __( 'Contact Email', 'wp-job-manager-applications' ),
 					'placeholder' => __( 'you@yourdomain.com', 'wp-job-manager-applications' ),
 					'description' => ''
 				),
@@ -98,7 +50,7 @@ if ( class_exists( 'WP_Job_Manager_Writepanels' ) ) {
 					'placeholder' => '0'
 				),
 				'_resume_id' => array(
-					'label'       => __( 'Online resume ID', 'wp-job-manager' ),
+					'label'       => __( 'Online Resume ID', 'wp-job-manager' ),
 					'type'        => 'text',
 					'placeholder' => 'Post ID of the candidate\'s resume'
 				),
@@ -110,6 +62,10 @@ if ( class_exists( 'WP_Job_Manager_Writepanels' ) ) {
 				)
 			) );
 
+			if ( ! function_exists( 'get_resume_share_link' ) ) {
+				unset( $fields['_resume_id'] );
+			}
+
 			return $fields;
 		}
 
@@ -117,8 +73,47 @@ if ( class_exists( 'WP_Job_Manager_Writepanels' ) ) {
 		 * add_meta_boxes function.
 		 */
 		public function add_meta_boxes() {
+			add_meta_box( 'job_application_save', __( 'Save Application', 'wp-job-manager-applications' ), array( $this, 'job_application_save' ), 'job_application', 'side', 'high' );
 			add_meta_box( 'job_application_data', __( 'Job Application Data', 'wp-job-manager-applications' ), array( $this, 'job_application_data' ), 'job_application', 'normal', 'high' );
-			add_meta_box( 'job_application_notes', __( 'Application Notes', 'wp-job-manager-applications' ), array( $this, 'application_notes' ), 'job_application', 'side', 'high' );
+			add_meta_box( 'job_application_notes', __( 'Application Notes', 'wp-job-manager-applications' ), array( $this, 'application_notes' ), 'job_application', 'side', 'default' );
+			remove_meta_box( 'submitdiv', 'job_application', 'side' );
+		}
+
+		/**
+		 * Publish meta box
+		 */
+		public function job_application_save( $post ) {
+			$statuses = get_job_application_statuses();
+			?>
+			<div class="submitbox" id="submitpost">
+				<div id="minor-publishing">
+					<div id="misc-publishing-actions">
+						<div class="misc-pub-section misc-pub-post-status">
+							<div id="post-status-select">
+								<select name='post_status' id='post_status'>
+									<?php
+									foreach ( $statuses as $key => $label ) {
+										$selected = selected( $post->post_status, $key, false );
+										echo "<option{$selected} value='" . esc_attr( $key ) . "'>" . esc_html( $label ) . "</option>";
+									}
+									?>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="major-publishing-actions">
+					<div id="delete-action">
+						<a class="submitdelete deletion" href="<?php echo get_delete_post_link( $post->ID ); ?>"><?php _e( 'Move to Trash' ); ?></a>
+					</div>
+					<div id="publishing-action">
+						<span class="spinner"></span>
+						<input name="save" class="button button-primary" type="submit" value="<?php _e( 'Save', 'wp-job-manager-applications' ); ?>">
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<?php
 		}
 
 		/**

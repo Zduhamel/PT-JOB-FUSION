@@ -7,145 +7,125 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
  */
 class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 
-	public    static $form_name = 'submit-resume';
-	protected static $resume_id;
-	protected static $job_id;
-	protected static $preview_resume;
-	protected static $steps;
-	protected static $step = 0;
+	public    $form_name = 'submit-resume';
+	protected $resume_id;
+	protected $job_id;
+	protected $preview_resume;
+
+	/** @var WP_Resume_Manager_Form_Submit_Resume The single instance of the class */
+	protected static $_instance = null;
 
 	/**
-	 * Init form
+	 * Main Instance
 	 */
-	public static function init() {
-		add_action( 'wp', array( __CLASS__, 'process' ) );
+	public static function instance() {
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
+	}
 
-		self::$steps  = (array) apply_filters( 'submit_resume_steps', array(
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_action( 'wp', array( $this, 'process' ) );
+
+		$this->steps  = (array) apply_filters( 'submit_resume_steps', array(
 			'submit' => array(
 				'name'     => __( 'Submit Details', 'wp-job-manager-resumes' ),
-				'view'     => array( __CLASS__, 'submit' ),
-				'handler'  => array( __CLASS__, 'submit_handler' ),
+				'view'     => array( $this, 'submit' ),
+				'handler'  => array( $this, 'submit_handler' ),
 				'priority' => 10
 				),
 			'preview' => array(
 				'name'     => __( 'Preview', 'wp-job-manager-resumes' ),
-				'view'     => array( __CLASS__, 'preview' ),
-				'handler'  => array( __CLASS__, 'preview_handler' ),
+				'view'     => array( $this, 'preview' ),
+				'handler'  => array( $this, 'preview_handler' ),
 				'priority' => 20
 			),
 			'done' => array(
 				'name'     => __( 'Done', 'wp-job-manager-resumes' ),
-				'view'     => array( __CLASS__, 'done' ),
-				'handler'  => array( __CLASS__, 'application_handler' ),
+				'view'     => array( $this, 'done' ),
+				'handler'  => array( $this, 'application_handler' ),
 				'priority' => 30
 			),
 			'application_done' => array(
 				'name'     => __( 'Application', 'wp-job-manager-resumes' ),
-				'view'     => array( __CLASS__, 'application_done' ),
+				'view'     => array( $this, 'application_done' ),
 				'priority' => 40
 			)
 		) );
 
-		uasort( self::$steps, array( __CLASS__, 'sort_by_priority' ) );
+		uasort( $this->steps, array( $this, 'sort_by_priority' ) );
 
 		// Get step/resume
 		if ( ! empty( $_REQUEST['step'] ) ) {
-			self::$step = is_numeric( $_REQUEST['step'] ) ? max( absint( $_REQUEST['step'] ), 0 ) : array_search( $_REQUEST['step'], array_keys( self::$steps ) );
+			$this->step = is_numeric( $_REQUEST['step'] ) ? max( absint( $_REQUEST['step'] ), 0 ) : array_search( $_REQUEST['step'], array_keys( $this->steps ) );
 		}
-		self::$resume_id = ! empty( $_REQUEST['resume_id'] ) ? absint( $_REQUEST[ 'resume_id' ] ) : 0;
-		self::$job_id    = ! empty( $_REQUEST['job_id'] ) ? absint( $_REQUEST[ 'job_id' ] ) : 0;
+		$this->resume_id = ! empty( $_REQUEST['resume_id'] ) ? absint( $_REQUEST[ 'resume_id' ] ) : 0;
+		$this->job_id    = ! empty( $_REQUEST['job_id'] ) ? absint( $_REQUEST[ 'job_id' ] ) : 0;
 
-		if ( self::$resume_id ) {
-			$resume_status = get_post_status( self::$resume_id );
+		if ( $this->resume_id ) {
+			$resume_status = get_post_status( $this->resume_id );
 			if ( 'expired' === $resume_status ) {
-				if ( ! resume_manager_user_can_edit_resume( self::$resume_id ) ) {
-					self::$resume_id = 0;
-					self::$job_id    = 0;
-					self::$step      = 0;
+				if ( ! resume_manager_user_can_edit_resume( $this->resume_id ) ) {
+					$this->resume_id = 0;
+					$this->job_id    = 0;
+					$this->step      = 0;
 				}
 			} elseif ( ! in_array( $resume_status, apply_filters( 'resume_manager_valid_submit_resume_statuses', array( 'preview' ) ) ) && empty( $_POST['resume_application_submit_button'] ) ) {
-				self::$resume_id = 0;
-				self::$job_id    = 0;
-				self::$step      = 0;
+				$this->resume_id = 0;
+				$this->job_id    = 0;
+				$this->step      = 0;
 			}
 		}
-	}
-
-	/**
-	 * Get step from outside of the class
-	 */
-	public static function get_step() {
-		return self::$step;
-	}
-
-	/**
-	 * Increase step from outside of the class
-	 */
-	public static function next_step() {
-		self::$step ++;
-	}
-
-	/**
-	 * Decrease step from outside of the class
-	 */
-	public static function previous_step() {
-		self::$step --;
-	}
-
-	/**
-	 * Sort array by priority value
-	 */
-	protected static function sort_by_priority( $a, $b ) {
-		return $a['priority'] - $b['priority'];
 	}
 
 	/**
 	 * Get the submitted resume ID
 	 * @return int
 	 */
-	public static function get_resume_id() {
-		return absint( self::$resume_id );
+	public function get_resume_id() {
+		return absint( $this->resume_id );
 	}
 
 	/**
 	 * Get the job ID if applying
 	 * @return int
 	 */
-	public static function get_job_id() {
-		return absint( self::$job_id );
+	public function get_job_id() {
+		return absint( $this->job_id );
 	}
 
 	/**
 	 * Get a field from either resume manager or job manager
 	 */
-	public static function get_field_template( $key, $field ) {
+	public function get_field_template( $key, $field ) {
 		switch ( $field['type'] ) {
 			case 'education' :
 			case 'experience' :
 			case 'links' :
-				get_job_manager_template( 'form-fields/' . $field['type'] . '-field.php', array( 'key' => $key, 'field' => $field ), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
+				get_job_manager_template( 'form-fields/' . $field['type'] . '-field.php', array( 'key' => $key, 'field' => $field, 'class' => $this ), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
 			break;
 			default :
-				get_job_manager_template( 'form-fields/' . $field['type'] . '-field.php', array( 'key' => $key, 'field' => $field ) );
+				get_job_manager_template( 'form-fields/' . $field['type'] . '-field.php', array( 'key' => $key, 'field' => $field, 'class' => $this ) );
 			break;
 		}
 	}
 
 	/**
 	 * init_fields function.
-	 *
-	 * @access public
-	 * @return void
 	 */
-	public static function init_fields() {
-		if ( self::$fields ) {
+	public function init_fields() {
+		if ( $this->fields ) {
 			return;
 		}
 		if ( $max = get_option( 'resume_manager_max_skills' ) ) {
 			$max = ' ' . sprintf( __( 'Maximum of %d.', 'wp-job-manager-resumes' ), $max );
 		}
 
-		self::$fields = apply_filters( 'submit_resume_form_fields', array(
+		$this->fields = apply_filters( 'submit_resume_form_fields', array(
 			'resume_fields' => array(
 				'candidate_name' => array(
 					'label'       => __( 'Your name', 'wp-job-manager-resumes' ),
@@ -320,103 +300,53 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 		) );
 
 		if ( ! get_option( 'resume_manager_enable_resume_upload' ) ) {
-			unset( self::$fields['resume_fields']['resume_file'] );
+			unset( $this->fields['resume_fields']['resume_file'] );
 		}
 
 		if ( ! get_option( 'resume_manager_enable_categories' ) || wp_count_terms( 'resume_category' ) == 0 ) {
-			unset( self::$fields['resume_fields']['resume_category'] );
+			unset( $this->fields['resume_fields']['resume_category'] );
 		}
 
 		if ( ! get_option( 'resume_manager_enable_skills' ) ) {
-			unset( self::$fields['resume_fields']['resume_skills'] );
+			unset( $this->fields['resume_fields']['resume_skills'] );
 		}
 	}
 
 	/**
-	 * Get post data for fields
-	 *
-	 * @return array of data
+	 * Get the value of a repeated fields (e.g. education, links)
+	 * @param  array $fields
+	 * @return array
 	 */
-	protected static function get_posted_fields() {
+	public function get_repeated_field( $field_prefix, $fields ) {
+		$items       = array();
+		$field_keys  = array_keys( $fields );
+		$first_field = current( $field_keys );
 
-		self::init_fields();
-
-		$values = array();
-
-		foreach ( self::$fields as $group_key => $fields ) {
-			foreach ( $fields as $key => $field ) {
-				// Get the value
-				$field_type = str_replace( '-', '_', $field['type'] );
-
-				if ( method_exists( __CLASS__, "get_posted_{$field_type}_field" ) )
-					$values[ $group_key ][ $key ] = call_user_func( __CLASS__ . "::get_posted_{$field_type}_field", $key, $field );
-				else
-					$values[ $group_key ][ $key ] = self::get_posted_field( $key, $field );
-
-				// Set fields value
-				self::$fields[ $group_key ][ $key ]['value'] = $values[ $group_key ][ $key ];
+		if ( ! empty( $_POST[ $field_prefix . '_' . $first_field ] ) && is_array( $_POST[ $field_prefix . '_' . $first_field ] ) ) {
+			$keys = array_keys( $_POST[ $field_prefix . '_' . $first_field ] );
+			foreach ( $keys as $posted_key ) {
+				$item = array();
+				foreach ( $fields as $key => $field ) {
+					switch ( $field['type'] ) {
+						case 'textarea' :
+							$item[ $key ] = wp_kses_post( stripslashes( $_POST[ $field_prefix . '_' . $key ][ $posted_key ] ) );
+						break;
+						default :
+							if ( is_array( $_POST[ $field_prefix . '_' . $key ][ $posted_key ] ) ) {
+								$item[ $key ] = array_filter( array_map( 'sanitize_text_field', array_map( 'stripslashes', $_POST[ $field_prefix . '_' . $key ][ $posted_key ] ) ) );
+							} else {
+								$item[ $key ] = sanitize_text_field( stripslashes( $_POST[ $field_prefix . '_' . $key ][ $posted_key ] ) );
+							}
+						break;
+					}
+					if ( empty( $item[ $key ] ) && ! empty( $field['required'] ) ) {
+						continue 2;
+					}
+				}
+				$items[] = $item;
 			}
 		}
-
-		return $values;
-	}
-
-	/**
-	 * Get the value of a posted field
-	 * @param  string $key
-	 * @param  array $field
-	 * @return string
-	 */
-	protected static function get_posted_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? sanitize_text_field( trim( stripslashes( $_POST[ $key ] ) ) ) : '';
-	}
-
-	/**
-	 * Get the value of a posted multiselect field
-	 * @param  string $key
-	 * @param  array $field
-	 * @return array
-	 */
-	protected static function get_posted_multiselect_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? array_map( 'sanitize_text_field', $_POST[ $key ] ) : array();
-	}
-
-	/**
-	 * Get the value of a posted file field
-	 * @param  string $key
-	 * @param  array $field
-	 * @return string|array
-	 */
-	protected static function get_posted_file_field( $key, $field ) {
-		$file = self::upload_file( $key, $field );
-
-		if ( ! $file ) {
-			$file = self::get_posted_field( 'current_' . $key, $field );
-		} elseif ( is_array( $file ) ) {
-			$file = array_filter( array_merge( $file, (array) self::get_posted_field( 'current_' . $key, $field ) ) );
-		}
-
-		return $file;
-	}
-
-	/**
-	 * Get the value of a posted textarea field
-	 * @param  string $key
-	 * @param  array $field
-	 * @return string
-	 */
-	protected static function get_posted_textarea_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? wp_kses_post( trim( stripslashes( $_POST[ $key ] ) ) ) : '';
-	}
-
-	/**
-	 * Get the value of a posted textarea field
-	 * @param  string $key
-	 * @param  array $field
-	 * @return string
-	 */
-	protected static function get_posted_wp_editor_field( $key, $field ) {
-		return self::get_posted_textarea_field( $key, $field );
+		return $items;
 	}
 
 	/**
@@ -425,20 +355,8 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 * @param  array $field
 	 * @return string
 	 */
-	public static function get_posted_links_field( $key, $field ) {
-		$name  = isset( $_POST['link_name'] ) ? $_POST['link_name'] : array();
-		$url   = isset( $_POST['link_url'] ) ? $_POST['link_url'] : array();
-		$links = array();
-
-		for ( $i = 0; $i < sizeof( $name ); $i ++ ) {
-			if ( ! empty( $name[ $i ] ) && ! empty( $url[ $i ] ) )
-				$links[] = array(
-					'name' => sanitize_text_field( stripslashes( $name[ $i ] ) ),
-					'url'  => sanitize_text_field( stripslashes( $url[ $i ] ) )
-				);
-		}
-
-		return apply_filters( 'submit_resume_form_fields_get_links_data', $links );
+	public function get_posted_links_field( $key, $field ) {
+		return apply_filters( 'submit_resume_form_fields_get_links_data', $this->get_repeated_field( $key, $field['fields'] ) );
 	}
 
 	/**
@@ -447,24 +365,8 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 * @param  array $field
 	 * @return string
 	 */
-	public static function get_posted_education_field( $key, $field ) {
-		$location      = isset( $_POST['candidate_education_location'] ) ? $_POST['candidate_education_location'] : array();
-		$qualification = isset( $_POST['candidate_education_qualification'] ) ? $_POST['candidate_education_qualification'] : array();
-		$date          = isset( $_POST['candidate_education_date'] ) ? $_POST['candidate_education_date'] : array();
-		$notes         = isset( $_POST['candidate_education_notes'] ) ? $_POST['candidate_education_notes'] : array();
-		$education     = array();
-
-		for ( $i = 0; $i < sizeof( $location ); $i ++ ) {
-			if ( ! empty( $location[ $i ] ) && ! empty( $qualification[ $i ] ) && ! empty( $date[ $i ] ) )
-				$education[] = array(
-					'location'      => sanitize_text_field( stripslashes( $location[ $i ] ) ),
-					'qualification' => sanitize_text_field( stripslashes( $qualification[ $i ] ) ),
-					'date'          => sanitize_text_field( stripslashes( $date[ $i ] ) ),
-					'notes'         => wp_kses_post( stripslashes( $notes[ $i ] ) ),
-				);
-		}
-
-		return apply_filters( 'submit_resume_form_fields_get_education_data', $education );
+	public function get_posted_education_field( $key, $field ) {
+		return apply_filters( 'submit_resume_form_fields_get_education_data', $this->get_repeated_field( $key, $field['fields'] ) );
 	}
 
 	/**
@@ -473,59 +375,8 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 * @param  array $field
 	 * @return string
 	 */
-	public static function get_posted_experience_field( $key, $field ) {
-		$employer   = isset( $_POST['candidate_experience_employer'] ) ? $_POST['candidate_experience_employer'] : array();
-		$job_title  = isset( $_POST['candidate_experience_job_title'] ) ? $_POST['candidate_experience_job_title'] : array();
-		$date       = isset( $_POST['candidate_experience_date'] ) ? $_POST['candidate_experience_date'] : array();
-		$notes      = isset( $_POST['candidate_experience_notes'] ) ? $_POST['candidate_experience_notes'] : array();
-		$experience = array();
-
-		for ( $i = 0; $i < sizeof( $employer ); $i ++ ) {
-			if ( ! empty( $employer[ $i ] ) && ! empty( $job_title[ $i ] ) && ! empty( $date[ $i ] ) )
-				$experience[] = array(
-					'employer'  => sanitize_text_field( stripslashes( $employer[ $i ] ) ),
-					'job_title' => sanitize_text_field( stripslashes( $job_title[ $i ] ) ),
-					'date'      => sanitize_text_field( stripslashes( $date[ $i ] ) ),
-					'notes'     => wp_kses_post( stripslashes( $notes[ $i ] ) ),
-				);
-		}
-
-		return apply_filters( 'submit_resume_form_fields_get_experience_data', $experience );
-	}
-
-	/**
-	 * Get posted terms for the taxonomy
-	 * @param  string $key
-	 * @param  array $field
-	 * @return array
-	 */
-	protected static function get_posted_term_checklist_field( $key, $field ) {
-		if ( isset( $_POST[ 'tax_input' ] ) && isset( $_POST[ 'tax_input' ][ $field['taxonomy'] ] ) ) {
-			// Ids were posted
-			return array_map( 'absint', $_POST[ 'tax_input' ][ $field['taxonomy'] ] );
-		} else {
-			return array();
-		}
-	}
-
-	/**
-	 * Get posted terms for the taxonomy
-	 * @param  string $key
-	 * @param  array $field
-	 * @return int
-	 */
-	protected static function get_posted_term_multiselect_field( $key, $field ) {
-		return isset( $_POST[ $key ] ) ? array_map( 'absint', $_POST[ $key ] ) : array();
-	}
-
-	/**
-	 * Get posted terms for the taxonomy
-	 * @param  string $key
-	 * @param  array $field
-	 * @return int
-	 */
-	protected static function get_posted_term_select_field( $key, $field ) {
-		return ! empty( $_POST[ $key ] ) && $_POST[ $key ] > 0 ? absint( $_POST[ $key ] ) : '';
+	public function get_posted_experience_field( $key, $field ) {
+		return apply_filters( 'submit_resume_form_fields_get_experience_data', $this->get_repeated_field( $key, $field['fields'] ) );
 	}
 
 	/**
@@ -533,8 +384,8 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 *
 	 * @return bool on success, WP_ERROR on failure
 	 */
-	protected static function validate_fields( $values ) {
-		foreach ( self::$fields as $group_key => $fields ) {
+	protected function validate_fields( $values ) {
+		foreach ( $this->fields as $group_key => $fields ) {
 			foreach ( $fields as $key => $field ) {
 				if ( $field['required'] && empty( $values[ $group_key ][ $key ] ) ) {
 					return new WP_Error( 'validation-error', sprintf( __( '%s is a required field', 'wp-job-manager-resumes' ), $field['label'] ) );
@@ -553,8 +404,12 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 					}
 				}
 				if ( 'resume_skills' === $key ) {
-					$max        = get_option( 'resume_manager_max_skills' );
-					$raw_skills = array_filter( array_map( 'sanitize_text_field', explode( ',', $values[ $group_key ][ $key ] ) ) );
+					if ( is_string( $values[ $group_key ][ $key ] ) ) {
+						$raw_skills = explode( ',', $values[ $group_key ][ $key ] );
+					} else {
+						$raw_skills = $values[ $group_key ][ $key ];
+					}
+					$max = get_option( 'resume_manager_max_skills' );
 
 					if ( $max && sizeof( $raw_skills ) > $max ) {
 						return new WP_Error( 'validation-error', sprintf( __( 'Please enter no more than %d skills.', 'wp-job-manager-resumes' ), $max ) );
@@ -563,7 +418,7 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 			}
 		}
 
-		return apply_filters( 'submit_resume_form_validate_fields', true, self::$fields, $values );
+		return apply_filters( 'submit_resume_form_validate_fields', true, $this->fields, $values );
 	}
 
 	/**
@@ -572,7 +427,7 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 * @access private
 	 * @return void
 	 */
-	private static function resume_categories() {
+	private function resume_categories() {
 		$options = array();
 		$terms   = get_resume_categories();
 		foreach ( $terms as $term )
@@ -581,78 +436,54 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	}
 
 	/**
-	 * Process function. all processing code if needed - can also change view if step is complete
-	 */
-	public static function process() {
-		$keys = array_keys( self::$steps );
-
-		if ( isset( $keys[ self::$step ] ) && is_callable( self::$steps[ $keys[ self::$step ] ]['handler'] ) ) {
-			call_user_func( self::$steps[ $keys[ self::$step ] ]['handler'] );
-		}
-	}
-
-	/**
-	 * output function. Call the view handler.
-	 */
-	public static function output( $atts = array() ) {
-		$keys = array_keys( self::$steps );
-
-		self::show_errors();
-
-		if ( isset( $keys[ self::$step ] ) && is_callable( self::$steps[ $keys[ self::$step ] ]['view'] ) ) {
-			call_user_func( self::$steps[ $keys[ self::$step ] ]['view'], $atts );
-		}
-	}
-
-	/**
 	 * Submit Step
 	 */
-	public static function submit() {
+	public function submit() {
 		global $job_manager, $post;
 
-		self::init_fields();
+		$this->init_fields();
 
 		// Load data if neccessary
-		if ( ! empty( $_POST['edit_resume'] ) && self::$resume_id ) {
-			$resume = get_post( self::$resume_id );
-			foreach ( self::$fields as $group_key => $fields ) {
+		if ( ! empty( $_POST['edit_resume'] ) && $this->resume_id ) {
+			$resume = get_post( $this->resume_id );
+			foreach ( $this->fields as $group_key => $fields ) {
 				foreach ( $fields as $key => $field ) {
 					switch ( $key ) {
 						case 'candidate_name' :
-							self::$fields[ $group_key ][ $key ]['value'] = $resume->post_title;
+							$this->fields[ $group_key ][ $key ]['value'] = $resume->post_title;
 						break;
 						case 'resume_content' :
-							self::$fields[ $group_key ][ $key ]['value'] = $resume->post_content;
+							$this->fields[ $group_key ][ $key ]['value'] = $resume->post_content;
 						break;
 						case 'resume_skills' :
-							self::$fields[ $group_key ][ $key ]['value'] = implode( ', ', wp_get_object_terms( $resume->ID, 'resume_skill', array( 'fields' => 'names' ) ) );
+							$this->fields[ $group_key ][ $key ]['value'] = implode( ', ', wp_get_object_terms( $resume->ID, 'resume_skill', array( 'fields' => 'names' ) ) );
 						break;
 						case 'resume_category' :
-							self::$fields[ $group_key ][ $key ]['value'] = wp_get_object_terms( $resume->ID, 'resume_category', array( 'fields' => 'ids' ) );
+							$this->fields[ $group_key ][ $key ]['value'] = wp_get_object_terms( $resume->ID, 'resume_category', array( 'fields' => 'ids' ) );
 						break;
 						default:
-							self::$fields[ $group_key ][ $key ]['value'] = get_post_meta( $resume->ID, '_' . $key, true );
+							$this->fields[ $group_key ][ $key ]['value'] = get_post_meta( $resume->ID, '_' . $key, true );
 						break;
 					}
 				}
 			}
-			self::$fields = apply_filters( 'submit_resume_form_fields_get_resume_data', self::$fields, $resume );
+			$this->fields = apply_filters( 'submit_resume_form_fields_get_resume_data', $this->fields, $resume );
 
 		// Get user meta
 		} elseif ( is_user_logged_in() && empty( $_POST ) ) {
 
-			self::$fields = apply_filters( 'submit_resume_form_fields_get_user_data', self::$fields, get_current_user_id() );
+			$this->fields = apply_filters( 'submit_resume_form_fields_get_user_data', $this->fields, get_current_user_id() );
 
 		}
 
 		get_job_manager_template( 'resume-submit.php', array(
-			'class'              => __CLASS__,
-			'form'               => self::$form_name,
-			'resume_id'          => self::get_resume_id(),
-			'job_id'             => self::get_job_id(),
-			'action'             => self::get_action(),
-			'resume_fields'      => self::get_fields( 'resume_fields' ),
-			'step'               => self::get_step(),
+			'class'              => $this,
+			'form'               => $this->form_name,
+			'resume_id'          => $this->get_resume_id(),
+			'job_id'             => $this->get_job_id(),
+			'action'             => $this->get_action(),
+			'resume_fields'      => $this->get_fields( 'resume_fields' ),
+			'step'               => $this->get_step(),
 			'submit_button_text' => apply_filters( 'submit_resume_form_submit_button_text', __( 'Preview &rarr;', 'wp-job-manager-resumes' ) )
 		), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
 	}
@@ -660,20 +491,20 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	/**
 	 * Submit Step is posted
 	 */
-	public static function submit_handler() {
+	public function submit_handler() {
 		try {
 
 			// Init fields
-			self::init_fields();
+			$this->init_fields();
 
 			// Get posted values
-			$values = self::get_posted_fields();
+			$values = $this->get_posted_fields();
 
 			if ( empty( $_POST['submit_resume'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'submit_form_posted' ) )
 				return;
 
 			// Validate required
-			if ( is_wp_error( ( $return = self::validate_fields( $values ) ) ) )
+			if ( is_wp_error( ( $return = $this->validate_fields( $values ) ) ) )
 				throw new Exception( $return->get_error_message() );
 
 			// Account creation
@@ -712,14 +543,14 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 			}
 
 			// Update the job
-			self::save_resume( $values['resume_fields']['candidate_name'], $values['resume_fields']['resume_content'], self::$resume_id ? '' : 'preview', $values );
-			self::update_resume_data( $values );
+			$this->save_resume( $values['resume_fields']['candidate_name'], $values['resume_fields']['resume_content'], $this->resume_id ? '' : 'preview', $values );
+			$this->update_resume_data( $values );
 
 			// Successful, show next step
-			self::$step ++;
+			$this->step ++;
 
 		} catch ( Exception $e ) {
-			self::add_error( $e->getMessage() );
+			$this->add_error( $e->getMessage() );
 			return;
 		}
 	}
@@ -731,12 +562,12 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 * @param  string $post_content
 	 * @param  string $status
 	 */
-	protected static function save_resume( $post_title, $post_content, $status = 'preview', $values = array() ) {
+	protected function save_resume( $post_title, $post_content, $status = 'preview', $values = array() ) {
 		$resume_slug   = array();
 
 		// Prepend with unqiue key
-		if ( self::$resume_id ) {
-			$prefix = get_post_meta( self::$resume_id, '_resume_name_prefix', true );
+		if ( $this->resume_id ) {
+			$prefix = get_post_meta( $this->resume_id, '_resume_name_prefix', true );
 
 			if ( ! $prefix )
 				$prefix = wp_generate_password( 10 );
@@ -761,12 +592,12 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 			$data['post_status'] = $status;
 		}
 
-		if ( self::$resume_id ) {
-			$data['ID'] = self::$resume_id;
+		if ( $this->resume_id ) {
+			$data['ID'] = $this->resume_id;
 			wp_update_post( $data );
 		} else {
-			self::$resume_id = wp_insert_post( $data );
-			update_post_meta( self::$resume_id, '_resume_name_prefix', $prefix );
+			$this->resume_id = wp_insert_post( $data );
+			update_post_meta( $this->resume_id, '_resume_name_prefix', $prefix );
 
 			// Save profile fields
 			$current_user   = wp_get_current_user();
@@ -789,24 +620,24 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	 *
 	 * @param  array $values
 	 */
-	protected static function update_resume_data( $values ) {
+	protected function update_resume_data( $values ) {
 		// Set defaults
-		add_post_meta( self::$resume_id, '_featured', 0, true );
+		add_post_meta( $this->resume_id, '_featured', 0, true );
 
 		// Loop fields and save meta and term data
-		foreach ( self::$fields as $group_key => $group_fields ) {
+		foreach ( $this->fields as $group_key => $group_fields ) {
 			foreach ( $group_fields as $key => $field ) {
 				// Save taxonomies
 				if ( ! empty( $field['taxonomy'] ) ) {
 					if ( is_array( $values[ $group_key ][ $key ] ) ) {
-						wp_set_object_terms( self::$resume_id, $values[ $group_key ][ $key ], $field['taxonomy'], false );
+						wp_set_object_terms( $this->resume_id, $values[ $group_key ][ $key ], $field['taxonomy'], false );
 					} else {
-						wp_set_object_terms( self::$resume_id, array( $values[ $group_key ][ $key ] ), $field['taxonomy'], false );
+						wp_set_object_terms( $this->resume_id, array( $values[ $group_key ][ $key ] ), $field['taxonomy'], false );
 					}
 
 				// Save meta data
 				} else {
-					update_post_meta( self::$resume_id, '_' . $key, $values[ $group_key ][ $key ] );
+					update_post_meta( $this->resume_id, '_' . $key, $values[ $group_key ][ $key ] );
 				}
 			}
 		}
@@ -844,34 +675,34 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 				$tags = array_map( 'absint', $raw_tags );
 			}
 
-			wp_set_object_terms( self::$resume_id, $tags, 'resume_skill', false );
+			wp_set_object_terms( $this->resume_id, $tags, 'resume_skill', false );
 		}
 
-		do_action( 'resume_manager_update_resume_data', self::$resume_id, $values );
+		do_action( 'resume_manager_update_resume_data', $this->resume_id, $values );
 	}
 
 	/**
 	 * Preview Step
 	 */
-	public static function preview() {
+	public function preview() {
 		global $post, $resume_preview;
 
 		wp_enqueue_script( 'wp-resume-manager-resume-submission' );
 
-		if ( self::$resume_id ) {
+		if ( $this->resume_id ) {
 
 			$resume_preview = true;
-			$post = get_post( self::$resume_id );
+			$post = get_post( $this->resume_id );
 			setup_postdata( $post );
 			?>
 			<form method="post" id="resume_preview">
 				<div class="resume_preview_title">
 					<input type="submit" name="continue" id="resume_preview_submit_button" class="button" value="<?php echo apply_filters( 'submit_resume_step_preview_submit_text', __( 'Submit Resume &rarr;', 'wp-job-manager-resumes' ) ); ?>" />
 					<input type="submit" name="edit_resume" class="button" value="<?php _e( '&larr; Edit resume', 'wp-job-manager-resumes' ); ?>" />
-					<input type="hidden" name="resume_id" value="<?php echo esc_attr( self::$resume_id ); ?>" />
-					<input type="hidden" name="job_id" value="<?php echo esc_attr( self::$job_id ); ?>" />
-					<input type="hidden" name="step" value="<?php echo esc_attr( self::$step ); ?>" />
-					<input type="hidden" name="resume_manager_form" value="<?php echo self::$form_name; ?>" />
+					<input type="hidden" name="resume_id" value="<?php echo esc_attr( $this->resume_id ); ?>" />
+					<input type="hidden" name="job_id" value="<?php echo esc_attr( $this->job_id ); ?>" />
+					<input type="hidden" name="step" value="<?php echo esc_attr( $this->step ); ?>" />
+					<input type="hidden" name="resume_manager_form" value="<?php echo $this->form_name; ?>" />
 					<h2>
 						<?php _e( 'Preview', 'wp-job-manager-resumes' ); ?>
 					</h2>
@@ -890,20 +721,20 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	/**
 	 * Preview Step Form handler
 	 */
-	public static function preview_handler() {
+	public function preview_handler() {
 		if ( ! $_POST ) {
 			return;
 		}
 
 		// Edit = show submit form again
 		if ( ! empty( $_POST['edit_resume'] ) ) {
-			self::$step --;
+			$this->step --;
 		}
 
 		// Continue = change job status then show next screen
 		if ( ! empty( $_POST['continue'] ) ) {
 
-			$resume = get_post( self::$resume_id );
+			$resume = get_post( $this->resume_id );
 
 			if ( in_array( $resume->post_status, array( 'preview', 'expired' ) ) ) {
 
@@ -917,51 +748,50 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 				wp_update_post( $update_resume );
 			}
 
-			self::$step ++;
+			$this->step ++;
 		}
 	}
 
 	/**
 	 * Done Step
 	 */
-	public static function done() {
-		do_action( 'resume_manager_resume_submitted', self::$resume_id );
+	public function done() {
+		do_action( 'resume_manager_resume_submitted', $this->resume_id );
 
-		get_job_manager_template( 'resume-submitted.php', array( 'resume' => get_post( self::$resume_id ), 'job_id' => self::$job_id ), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
+		get_job_manager_template( 'resume-submitted.php', array( 'resume' => get_post( $this->resume_id ), 'job_id' => $this->job_id ), 'wp-job-manager-resumes', RESUME_MANAGER_PLUGIN_DIR . '/templates/' );
 
-		if ( self::$job_id && get_option( 'resume_manager_enable_application' ) ) {
-			if ( get_post_type( self::$job_id ) !== 'job_listing' ) {
+		if ( $this->job_id && get_option( 'resume_manager_enable_application' ) ) {
+			if ( get_post_type( $this->job_id ) !== 'job_listing' ) {
 				return;
 			}
 
-			$method = get_the_job_application_method( self::$job_id );
+			$method = get_the_job_application_method( $this->job_id );
 
-			if ( "email" !== $method->type && ! class_exists( 'WP_Job_Manager_Applications' ) ) {
-				return;
+			if ( "email" === $method->type || ( class_exists( 'WP_Job_Manager_Applications' ) && get_option( 'resume_manager_enable_application_for_url_method', 1 ) ) ) {
+				?>
+				<form method="post" class="apply_with_resume">
+					<p class="applying_for"><?php printf( __( 'Enter a message below to apply to "%s". This will accompany your online resume and be sent to the employer.', 'wp-job-manager-resumes' ), '<a href="' . get_permalink( $this->job_id ) . '">' . get_the_title( $this->job_id ) . '</a>' ); ?></p>
+					<p>
+						<label><?php _e( 'Message', 'wp-job-manager-resumes' ); ?>:</label>
+						<textarea name="application_message" cols="20" rows="4" required><?php if ( isset( $_POST['application_message'] ) ) echo esc_textarea( stripslashes( $_POST['application_message'] ) ); ?></textarea>
+					</p>
+					<p>
+						<input type="submit" name="resume_application_submit_button" value="<?php esc_attr_e( 'Send application', 'wp-job-manager-resumes' ); ?>" />
+						<input type="hidden" name="resume_id" value="<?php echo esc_attr( $this->resume_id ); ?>" />
+						<input type="hidden" name="job_id" value="<?php echo esc_attr( $this->job_id ); ?>" />
+						<input type="hidden" name="step" value="<?php echo esc_attr( $this->step ); ?>" />
+						<input type="hidden" name="resume_manager_form" value="<?php echo $this->form_name; ?>" />
+					</p>
+				</form>
+				<?php
 			}
-			?>
-			<form method="post" class="apply_with_resume">
-				<p class="applying_for"><?php printf( __( 'Enter a message below to apply to "%s". This will accompany your online resume and be sent to the employer.', 'wp-job-manager-resumes' ), '<a href="' . get_permalink( self::$job_id ) . '">' . get_the_title( self::$job_id ) . '</a>' ); ?></p>
-				<p>
-					<label><?php _e( 'Message', 'wp-job-manager-resumes' ); ?>:</label>
-					<textarea name="application_message" cols="20" rows="4" required><?php if ( isset( $_POST['application_message'] ) ) echo esc_textarea( stripslashes( $_POST['application_message'] ) ); ?></textarea>
-				</p>
-				<p>
-					<input type="submit" name="resume_application_submit_button" value="<?php esc_attr_e( 'Send application', 'wp-job-manager-resumes' ); ?>" />
-					<input type="hidden" name="resume_id" value="<?php echo esc_attr( self::$resume_id ); ?>" />
-					<input type="hidden" name="job_id" value="<?php echo esc_attr( self::$job_id ); ?>" />
-					<input type="hidden" name="step" value="<?php echo esc_attr( self::$step ); ?>" />
-					<input type="hidden" name="resume_manager_form" value="<?php echo self::$form_name; ?>" />
-				</p>
-			</form>
-			<?php
 		}
 	}
 
 	/**
 	 * Optional step triggered when applying to a job after submitting a resume
 	 */
-	public static function application_handler() {
+	public function application_handler() {
 		if ( ! $_POST ) {
 			return;
 		}
@@ -972,14 +802,14 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 			$application_message = wp_kses_post( stripslashes( $_POST['application_message'] ) );
 
 			if ( ! $application_message ) {
-				self::add_error( __( 'Please enter a message', 'wp-job-manager-resumes' ) );
+				$this->add_error( __( 'Please enter a message', 'wp-job-manager-resumes' ) );
 				return;
 			}
 
-			if ( WP_Resume_Manager_Apply::send_application( self::$job_id, self::$resume_id, $application_message ) ) {
-				self::$step ++;
+			if ( WP_Resume_Manager_Apply::send_application( $this->job_id, $this->resume_id, $application_message ) ) {
+				$this->step ++;
 			} else {
-				self::add_error( __( 'Error sending application.', 'wp-job-manager-resumes' ) );
+				$this->add_error( __( 'Error sending application.', 'wp-job-manager-resumes' ) );
 				return;
 			}
 		}
@@ -988,141 +818,7 @@ class WP_Resume_Manager_Form_Submit_Resume extends WP_Job_Manager_Form {
 	/**
 	 * Show message once the application has been sent
 	 */
-	public static function application_done() {
+	public function application_done() {
 		printf( '<p>' . __( 'Your application has been sent successfully', 'wp-job-manager-resumes' ) . '</p>' );
-	}
-
-	/**
-	 * Upload a file
-	 */
-	public static function upload_file( $field_key, $field ) {
-		if ( version_compare( JOB_MANAGER_VERSION, '1.21.0', '>=' ) ) {
-			if ( isset( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ]['name'] ) ) {
-				if ( ! empty( $field['allowed_mime_types'] ) ) {
-					$allowed_mime_types = $field['allowed_mime_types'];
-				} else {
-					$allowed_mime_types = get_allowed_mime_types();
-				}
-
-				$file_urls       = array();
-				$files_to_upload = job_manager_prepare_uploaded_files( $_FILES[ $field_key ] );
-
-				foreach ( $files_to_upload as $file_to_upload ) {
-					$uploaded_file = job_manager_upload_file( $file_to_upload, array( 'file_key' => $field_key ) );
-
-					if ( is_wp_error( $uploaded_file ) ) {
-						throw new Exception( $uploaded_file->get_error_message() );
-					} else {
-						$file_urls[] = $uploaded_file->url;
-					}
-				}
-
-				if ( ! empty( $field['multiple'] ) ) {
-					return $file_urls;
-				} else {
-					return current( $file_urls );
-				}
-			}
-		} else {
-			if ( 'resume_file' == $field_key ) {
-				add_filter( 'upload_dir', array( __CLASS__, 'upload_resume_file_dir' ), 20 );
-			} else {
-				remove_filter( 'upload_dir', array( __CLASS__, 'upload_resume_file_dir' ), 20 );
-			}
-
-			/** WordPress Administration File API */
-			include_once( ABSPATH . 'wp-admin/includes/file.php' );
-
-			/** WordPress Media Administration API */
-			include_once( ABSPATH . 'wp-admin/includes/media.php' );
-
-			if ( isset( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ] ) && ! empty( $_FILES[ $field_key ]['name'] ) ) {
-				$file = $_FILES[ $field_key ];
-
-				if ( ! empty( $field['allowed_mime_types'] ) ) {
-					$allowed_mime_types = $field['allowed_mime_types'];
-				} else {
-					$allowed_mime_types = get_allowed_mime_types();
-				}
-
-				if ( empty( $file['name'] ) ) {
-					return false;
-				}
-
-				if ( is_array( $file['name'] ) ) {
-					$file_urls = array();
-
-					foreach ( $file['name'] as $key => $value ) {
-						if ( ! empty( $file['name'][ $key ] ) ) {
-
-							if ( ! in_array( $file['type'][ $key ], $allowed_mime_types ) ) {
-				    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'][ $key ], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
-							}
-
-							$upload_file = array(
-								'name'     => $file['name'][ $key ],
-								'type'     => $file['type'][ $key ],
-								'tmp_name' => $file['tmp_name'][ $key ],
-								'error'    => $file['error'][ $key ],
-								'size'     => $file['size'][ $key ]
-							);
-
-							add_filter( 'upload_dir',  array( __CLASS__, 'upload_dir' ) );
-							$upload = wp_handle_upload( $upload_file, apply_filters( 'submit_resume_wp_handle_upload_overrides', array( 'test_form' => FALSE ) ) );
-							remove_filter( 'upload_dir', array( __CLASS__, 'upload_dir' ) );
-
-							if ( ! empty( $upload['error'] ) ) {
-								throw new Exception( $upload['error'] );
-							}
-
-							$file_urls[] = $upload['url'];
-						}
-					}
-
-					return $file_urls;
-				} else {
-					if ( ! in_array( $file['type'], $allowed_mime_types ) ) {
-		    			throw new Exception( sprintf( __( '"%s" (filetype %s) needs to be one of the following file types: %s', 'wp-job-manager' ), $field['label'], $file['type'], implode( ', ', array_keys( $allowed_mime_types ) ) ) );
-					}
-
-					add_filter( 'upload_dir',  array( __CLASS__, 'upload_dir' ) );
-					$upload = wp_handle_upload( $file, apply_filters( 'submit_resume_wp_handle_upload_overrides', array( 'test_form' => FALSE ) ) );
-					remove_filter( 'upload_dir', array( __CLASS__, 'upload_dir' ) );
-
-					if ( ! empty( $upload['error'] ) ) {
-						throw new Exception( $upload['error'] );
-					} else {
-						return $upload['url'];
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Filter the upload directory
-	 */
-	public static function upload_dir( $pathdata ) {
-		if ( empty( $pathdata['subdir'] ) ) {
-			$pathdata['path']   = $pathdata['path'] . '/resumes';
-			$pathdata['url']    = $pathdata['url']. '/resumes';
-			$pathdata['subdir'] = '/resumes';
-		} else {
-			$new_subdir         = '/resumes' . $pathdata['subdir'];
-			$pathdata['path']   = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['path'] );
-			$pathdata['url']    = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['url'] );
-			$pathdata['subdir'] = str_replace( $pathdata['subdir'], $new_subdir, $pathdata['subdir'] );
-		}
-		return $pathdata;
-	}
-
-	/**
-	 * Filter the upload directory
-	 */
-	public static function upload_resume_file_dir( $pathdata ) {
-		$pathdata['path']   = str_replace( '/resumes', '/resumes/resume_files', $pathdata['path'] );
-		$pathdata['url']    = str_replace( '/resumes', '/resumes/resume_files', $pathdata['url'] );
-		$pathdata['subdir'] = str_replace( '/resumes', '/resumes/resume_files', $pathdata['subdir'] );
-		return $pathdata;
 	}
 }

@@ -3,11 +3,11 @@
 Plugin Name: WP Job Manager - Resume Manager
 Plugin URI: https://wpjobmanager.com/add-ons/resume-manager/
 Description: Manage canidate resumes from the WordPress admin panel, and allow candidates to post their resumes directly to your site.
-Version: 1.10.2
+Version: 1.11.2
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.8
-Tested up to: 4.1
+Tested up to: 4.2
 
 	Copyright: 2013 Mike Jolley
 	License: GNU General Public License v3.0
@@ -15,8 +15,9 @@ Tested up to: 4.1
 */
 
 // Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) )
+if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
 
 if ( ! class_exists( 'WPJM_Updater' ) ) {
 	include( 'includes/updater/class-wpjm-updater.php' );
@@ -32,7 +33,7 @@ class WP_Resume_Manager extends WPJM_Updater {
 	 */
 	public function __construct() {
 		// Define constants
-		define( 'RESUME_MANAGER_VERSION', '1.10.2' );
+		define( 'RESUME_MANAGER_VERSION', '1.11.2' );
 		define( 'RESUME_MANAGER_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'RESUME_MANAGER_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
 
@@ -62,6 +63,7 @@ class WP_Resume_Manager extends WPJM_Updater {
 		register_activation_hook( basename( dirname( __FILE__ ) ) . '/' . basename( __FILE__ ), 'flush_rewrite_rules', 15 );
 
 		// Actions
+		add_action( 'admin_notices', array( $this, 'version_check' ) );
 		add_action( 'plugins_loaded', array( $this, 'admin' ) );
 		add_action( 'widgets_init', array( $this, 'widgets_init' ), 12 );
 		add_action( 'plugins_loaded', array( $this, 'load_plugin_textdomain' ) );
@@ -72,6 +74,18 @@ class WP_Resume_Manager extends WPJM_Updater {
 
 		// Init updates
 		$this->init_updates( __FILE__ );
+	}
+
+	/**
+	 * Check JM version
+	 */
+	public function version_check() {
+		$required_jm_version      = '1.22.0';
+		if ( ! defined( 'JOB_MANAGER_VERSION' ) ) {
+			?><div class="error"><p><?php _e( 'Resume Manager requires WP Job Manager to be installed!', 'wp-job-manager-applications' ); ?></p></div><?php
+		} elseif ( version_compare( JOB_MANAGER_VERSION, $required_jm_version, '<' ) ) {
+			?><div class="error"><p><?php printf( __( 'Resume Manager requires WP Job Manager %s (you are using %s)', 'wp-job-manager-applications' ), $required_jm_version, JOB_MANAGER_VERSION ); ?></p></div><?php
+		}
 	}
 
 	/**
@@ -87,8 +101,9 @@ class WP_Resume_Manager extends WPJM_Updater {
 	 * Include admin
 	 */
 	public function admin() {
-		if ( is_admin() && class_exists( 'WP_Job_Manager' ) )
+		if ( is_admin() && class_exists( 'WP_Job_Manager' ) ) {
 			include( 'includes/admin/class-wp-resume-manager-admin.php' );
+		}
 	}
 
 	/**

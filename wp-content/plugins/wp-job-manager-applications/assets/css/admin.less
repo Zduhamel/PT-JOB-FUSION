@@ -1,6 +1,139 @@
 @import "mixins";
 @import "icons.less";
 
+.wp-job-manager-applications-form-editor {
+	.nav-tab-wrapper {
+		margin-bottom: 15px;
+	}
+	table {
+		th {
+			padding: 1em 0 1em 1em;
+		}
+		td {
+			overflow: visible;
+			padding: 1em 0 1em 1em;
+			vertical-align: middle;
+			input.input-text, select {
+				width: 100%;
+				min-width: 100px;
+			}
+			.na {
+				display: block;
+				color: #ccc;
+				text-align: center;
+			}
+			.multiple-files {
+				input {
+					width: auto;
+					display: inline-block;
+					min-width: 16px;
+				}
+			}
+		}
+		td:last-child, th:last-child {
+			padding-right: 1em;
+		}
+		tr:nth-child(odd) {
+			td {
+				background-color: #F9F9F9;
+			}
+		}
+		.sort-column {
+			cursor: move;
+			color: #ccc;
+			&:before {
+				content: "\f333";
+				font-family: 'dashicons';
+			}
+		}
+		.field-actions {
+			text-align: right;
+			a.delete-field {
+				color: #ccc;
+				padding: 1em 0 0 0;
+				width: 1em;
+				height: 0;
+				overflow: hidden;
+				display: inline-block;
+				position: relative;
+				&:before {
+					content: "\f153";
+					font-family: 'dashicons';
+					font-size: 1em;
+					line-height: 1em;
+					vertical-align: top;
+					position: absolute;
+					top:0;
+					left:0;
+				}
+				&:hover {
+					color: red;
+				}
+			}
+		}
+		tfoot th {
+			vertical-align: middle;
+			line-height: 28px;
+			input, .button {
+				margin: 0;
+				float: none;
+				vertical-align: middle;
+			}
+			.add-field {
+				float: left;
+			}
+		}
+	}
+	.save-actions {
+		text-align: right;
+		input {
+			margin-left: 1em;
+		}
+		.reset {
+			color: #bbb;
+			text-decoration: none;
+			&:hover {
+				color: red;
+			}
+		}
+	}
+	.wp-job-applications-email-content-wrapper {
+		overflow: hidden;
+	}
+	.wp-job-applications-email-content {
+		width: 60%;
+		display: block;
+		float: left;
+		p {
+			margin-top: 0;
+		}
+		input {
+			width: 100%;
+			font-size: 1.5em;
+		}
+		textarea {
+			height: 400px;
+			width: 100%;
+			font-family: monospace;
+		}
+	}
+	.wp-job-applications-email-content-tags {
+		width: 40%;
+		padding-left: 1em;
+		box-sizing: border-box;
+		float: right;
+		p {
+			margin-top: 0;
+		}
+	}
+	p.submit-email {
+		clear: both;
+		margin: 0;
+		padding: 1.2em 0;
+		margin: 1em 0;
+		border-top: 1px solid #ddd;
+	}
+}
 .widefat {
 	.column-job_applications {
 		width: 9%;
@@ -143,31 +276,16 @@
 		}
 	}
 }
-.wp_job_manager_meta_data {
-	p {
-		overflow: hidden;
-		margin: 0 0 1em;
-		padding: 0 0 0 20%;
-		position: relative;
-		line-height: 2em;
+#job_application_save {
+	.inside {
+		margin: 0;
+		padding: 0;
 	}
-	label {
-		width: 20%;
-		position: absolute;
-		left: 0;
-		vertical-align: middle;
-	}
-	input {
-		width: 50%;
-		margin: 1px 0;
-		-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-		-moz-box-sizing: border-box;    /* Firefox, other Gecko */
-		box-sizing: border-box;         /* Opera/IE 8+ */
-		vertical-align: middle;
-	}
-	input.checkbox {
-		width: auto;
-		margin: 4px 2px;
+	#misc-publishing-actions {
+		padding: 0 !important;
+		select {
+			width: 100% !important;
+		}
 	}
 }
 #job_application_notes {

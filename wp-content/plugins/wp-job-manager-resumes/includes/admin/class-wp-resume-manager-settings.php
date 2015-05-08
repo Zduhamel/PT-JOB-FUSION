@@ -1,6 +1,7 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * WP_Resume_Manager_Settings class.
@@ -208,23 +209,30 @@ class WP_Resume_Manager_Settings extends WP_Job_Manager_Settings {
 					__( 'Apply with Resume', 'wp-job-manager-resumes' ),
 					array(
 						array(
-							'name'       => 'resume_manager_enable_application',
-							'std'        => '0',
-							'label'      => __( 'Apply With Resume', 'wp-job-manager-resumes' ),
-							'cb_label'   => __( 'Allow candidates to apply to jobs with resumes', 'wp-job-manager-resumes' ),
-							'desc'       => __( 'If a candidate applies with their online resume, the employer will be mailed their message and a private link to the resume. This works when the job application method is by email only (unless using the Job Applications addon as well).', 'wp-job-manager-resumes' ),
-							'type'       => 'checkbox',
-							'attributes' => array()
+							'name'     => 'resume_manager_enable_application',
+							'std'      => '1',
+							'label'    => __( 'Email Application Method', 'wp-job-manager-resumes' ),
+							'cb_label' => __( 'Allow candidates to apply to jobs which use the email application method', 'wp-job-manager-resumes' ),
+							'desc'     => __( 'If a candidate applies to a job with their online resume, the employer will be mailed their message and a private link to the resume.', 'wp-job-manager-resumes' ),
+							'type'     => 'checkbox'
+						),
+						array(
+							'name' 		=> 'resume_manager_enable_application_for_url_method',
+							'std' 		=> '1',
+							'label' 	=> __( 'Website URL Application Method', 'wp-job-manager-resumes' ),
+							'cb_label' => __( 'Allow candidates to apply to jobs which use the the website URL application method', 'wp-job-manager-resumes' ),
+							'desc'     => __( 'If a candidate applies to a job with their online resume, the application will be stored in the database.', 'wp-job-manager-resumes' ),
+							'type'      => 'checkbox'
 						),
 						array(
 							'name'       => 'resume_manager_force_application',
 							'std'        => '0',
 							'label'      => __( 'Force Apply With Resume', 'wp-job-manager-resumes' ),
 							'cb_label'   => __( 'Force candidates to create a resume and apply through resume manager', 'wp-job-manager-resumes' ),
-							'desc'       => __( 'Candidates without a resume on file will be taken through the resume submission process to apply for a job. Other details, such as the application email address, will be hidden. This works when the job application method is by email only (unless using the Job Applications addon as well).', 'wp-job-manager-resumes' ),
+							'desc'       => __( 'Candidates without a resume on file will be taken through the resume submission process to apply for a job. Other details, such as the application email address, will be hidden.', 'wp-job-manager-resumes' ),
 							'type'       => 'checkbox',
 							'attributes' => array()
-						),
+						)
 					)
 				),
 				'resume_pages' => array(
@@ -281,5 +289,9 @@ class WP_Resume_Manager_Settings extends WP_Job_Manager_Settings {
 				),
 			)
 		);
+
+		if ( ! class_exists( 'WP_Job_Manager_Applications' ) ) {
+			unset( $this->settings['resume_application'][1][1] );
+		}
 	}
 }

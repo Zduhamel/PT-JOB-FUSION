@@ -608,53 +608,26 @@ function soliloquy_ajax_load_library() {
 
     // Prepare variables.
     $offset  = (int) $_POST['offset'];
+    $search  = trim( stripslashes( $_POST['search'] ) );
     $post_id = absint( $_POST['post_id'] );
     $html    = '';
 
-    // Grab the library contents with the included offset parameter.
-    $library = get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'any', 'posts_per_page' => 20, 'offset' => $offset ) );
-    if ( $library ) {
-        foreach ( (array) $library as $image ) {
-            $has_slider = get_post_meta( $image->ID, '_sol_has_slider', true );
-            $class       = $has_slider && in_array( $post_id, (array) $has_slider ) ? ' selected soliloquy-in-slider' : '';
+    // Build args
+    $args = array(
+        'post_type'     => 'attachment', 
+        'post_mime_type'=> 'image', 
+        'post_status'   => 'any', 
+        'posts_per_page'=> 20, 
+        'offset'        => $offset,
+    );
 
-            $html .= '<li class="attachment' . $class . '" data-attachment-id="' . absint( $image->ID ) . '">';
-                $html .= '<div class="attachment-preview landscape">';
-                    $html .= '<div class="thumbnail">';
-                        $html .= '<div class="centered">';
-                            $src = wp_get_attachment_image_src( $image->ID, 'thumbnail' );
-                            $html .= '<img src="' . esc_url( $src[0] ) . '" />';
-                        $html .= '</div>';
-                    $html .= '</div>';
-                    $html .= '<a class="check" href="#"><div class="media-modal-icon"></div></a>';
-                $html .= '</div>';
-            $html .= '</li>';
-        }
+    // Add search term to args if not empty
+    if ( ! empty( $search ) ) {
+        $args['s'] = $search;
     }
 
-    echo json_encode( array( 'html' => stripslashes( $html ) ) );
-    die;
-
-}
-
-add_action( 'wp_ajax_soliloquy_library_search', 'soliloquy_ajax_library_search' );
-/**
- * Searches the Media Library for images matching the term specified in the search.
- *
- * @since 1.0.0
- */
-function soliloquy_ajax_library_search() {
-
-    // Run a security check first.
-    check_ajax_referer( 'soliloquy-library-search', 'nonce' );
-
-    // Prepare variables.
-    $search  = stripslashes( $_POST['search'] );
-    $post_id = absint( $_POST['post_id'] );
-    $html    = '';
-
-    // Grab the library contents with the included offset parameter.
-    $library = get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'any', 'posts_per_page' => -1, 's' => $search ) );
+    // Grab the library contents
+    $library = get_posts( $args );
     if ( $library ) {
         foreach ( (array) $library as $image ) {
             $has_slider = get_post_meta( $image->ID, '_sol_has_slider', true );

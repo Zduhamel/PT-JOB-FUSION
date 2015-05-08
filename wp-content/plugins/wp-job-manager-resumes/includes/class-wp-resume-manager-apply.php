@@ -18,7 +18,7 @@ class WP_Resume_Manager_Apply {
 		add_action( 'submit_resume_form_start', array( $this, 'resume_form_intro' ) );
 		add_action( 'job_manager_application_details_email', array( $this, 'apply_with_resume' ), 20 );
 
-		if ( class_exists( 'WP_Job_Manager_Applications' ) ) {
+		if ( class_exists( 'WP_Job_Manager_Applications' ) && get_option( 'resume_manager_enable_application_for_url_method', 1 ) ) {
 			add_action( 'job_manager_application_details_url', array( $this, 'apply_with_resume' ), 20 );
 		}
 	}
@@ -31,7 +31,7 @@ class WP_Resume_Manager_Apply {
 			global $job_manager;
 			remove_action( 'job_manager_application_details_email', array( $job_manager->post_types, 'application_details_email' ) );
 
-			if ( class_exists( 'WP_Job_Manager_Applications' ) ) {
+			if ( class_exists( 'WP_Job_Manager_Applications' ) && get_option( 'resume_manager_enable_application_for_url_method', 1 ) ) {
 				remove_action( 'job_manager_application_details_url', array( $job_manager->post_types, 'application_details_url' ) );
 			}
 		}
@@ -103,7 +103,7 @@ class WP_Resume_Manager_Apply {
 
 			$method = get_the_job_application_method( $job_id );
 
-			if ( "email" !== $method->type && ! class_exists( 'WP_Job_Manager_Applications' ) ) {
+			if ( "email" !== $method->type && ! ( class_exists( 'WP_Job_Manager_Applications' ) && get_option( 'resume_manager_enable_application_for_url_method', 1 ) ) ) {
 				$this->error = __( 'This job cannot be applied for using a resume', 'wp-job-manager-resumes' );
 				return;
 			}
@@ -159,7 +159,11 @@ class WP_Resume_Manager_Apply {
 
 		do_action( 'applied_with_resume', get_current_user_id(), $job_id, $resume_id, $application_message, $sent );
 
-		return ( $sent || class_exists( 'WP_Job_Manager_Applications' ) );
+		if ( "email" !== $method->type && class_exists( 'WP_Job_Manager_Applications' ) && get_option( 'resume_manager_enable_application_for_url_method', 1 ) ) {
+			$sent = true;
+		}
+
+		return $sent;
 	}
 
 	/**

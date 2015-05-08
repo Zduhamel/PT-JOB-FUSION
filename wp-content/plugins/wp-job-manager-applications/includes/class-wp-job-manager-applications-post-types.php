@@ -14,10 +14,11 @@ class WP_Job_Manager_Applications_Post_Types {
 		if ( get_option( 'job_application_delete_with_job', 0 ) ) {
 			add_action( 'delete_post', array( $this, 'delete_post' ) );
 		}
+		add_action( 'job_applications_purge', array( $this, 'job_applications_purge' ) );
 	}
 
 	public function already_applied_title( $title, $post_id = '' ) {
-		if ( $post_id && 'job_listing' === get_post_type( $post_id ) && ! is_single() && is_user_logged_in() && user_has_applied_for_job( get_current_user_id(), $post_id ) ) {
+		if ( $post_id && 'job_listing' === get_post_type( $post_id ) && ! is_single() && user_has_applied_for_job( get_current_user_id(), $post_id ) ) {
 			$title .= ' <span class="job-manager-applications-applied-notice">' . __( 'Applied', 'wp-job-manager-applications' ) . '</span>';
 		}
 		return $title;
@@ -29,7 +30,7 @@ class WP_Job_Manager_Applications_Post_Types {
 	public function already_applied_message() {
 		global $post;
 
-		if ( is_user_logged_in() && user_has_applied_for_job( get_current_user_id(), $post->ID ) ) {
+		if ( user_has_applied_for_job( get_current_user_id(), $post->ID ) ) {
 			 get_job_manager_template( 'applied-notice.php', array(), 'wp-job-manager-applications', JOB_MANAGER_APPLICATIONS_PLUGIN_DIR . '/templates/' );
 		}
 	}
@@ -112,6 +113,53 @@ class WP_Job_Manager_Applications_Post_Types {
 						wp_delete_post( $application->ID, true );
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * recursive_rmdir function
+	 */
+	public function recursive_rmdir( $directory ) {
+	    foreach( glob( "{$directory}/*" ) as $file ) {
+	        if ( is_dir( $file ) ) {
+	            $this->recursive_rmdir( $file );
+	        } else {
+	            unlink( $file );
+	        }
+	    }
+	    rmdir( $directory );
+	}
+
+	/**
+	 * Purge applications after x days
+	 */
+	public function job_applications_purge() {
+		$days = absint( get_option( 'job_application_purge_days' ) );
+
+		if ( ! $days ) {
+			return;
+		}
+
+		global $wpdb;
+
+		$application_ids = $wpdb->get_col( $wpdb->prepare( "
+			SELECT ID FROM {$wpdb->posts} as posts
+			WHERE posts.post_type = 'job_application'
+			AND DATEDIFF( NOW(), posts.post_date ) > %d
+		", $days ) );
+
+		if ( $application_ids ) {
+			foreach ( $application_ids as $application_id ) {
+				$upload_dir = wp_upload_dir();
+				$secret_dir = get_post_meta( $application_id, '_secret_dir', true );
+				$dir_path   = trailingslashit( $upload_dir['basedir'] ) . 'job_applications/' . $secret_dir;
+
+				if ( $secret_dir && is_dir( $dir_path ) ) {
+					$this->recursive_rmdir( $dir_path );
+				}
+
+				wp_delete_post( $application_id, true );
 			}
 		}
 	}

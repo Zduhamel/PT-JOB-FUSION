@@ -155,7 +155,8 @@ class WP_Job_Manager_SPL_Stripe extends WP_Job_Manager_SPL_Gateway {
 			}
 
 		} catch( Exception $e ) {
-			WP_Job_Manager_Form_Submit_Job::add_error( $e->getMessage() );
+			$form = WP_Job_Manager_Form_Submit_Job::instance();
+			$form->add_error( $e->getMessage() );
 			return false;
 		}
 	}

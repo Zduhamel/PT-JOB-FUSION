@@ -3,11 +3,11 @@
 Plugin Name: WP Job Manager - Simple Paid Listings
 Plugin URI: https://wpjobmanager.com/add-ons/simple-paid-listings/
 Description: Add paid listing functionality. Set a price per listing and take payment via Stripe or PayPal before the listing becomes published.
-Version: 1.1.15
+Version: 1.2.0
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.8
-Tested up to: 3.9
+Tested up to: 4.1
 
 	Copyright: 2013 Mike Jolley
 	License: GNU General Public License v3.0
@@ -66,7 +66,7 @@ class WP_Job_Manager_Simple_Paid_Listings extends WPJM_Updater {
 	 * @return float
 	 */
 	public static function get_job_listing_cost() {
-		return apply_filters( 'wp_job_manager_spl_get_job_listing_cost', number_format( get_option( 'job_manager_spl_listing_cost' ), 2, '.', '' ) );
+		return apply_filters( 'wp_job_manager_spl_get_job_listing_cost', number_format( get_option( 'job_manager_spl_listing_cost', 0 ), 2, '.', '' ) );
 	}
 
 	/**
@@ -118,9 +118,11 @@ class WP_Job_Manager_Simple_Paid_Listings extends WPJM_Updater {
 			return;
 		}
 
+		$form = WP_Job_Manager_Form_Submit_Job::instance();
+
 		// Edit = show submit form again
 		if ( ! empty( $_POST['edit_job'] ) ) {
-			WP_Job_Manager_Form_Submit_Job::previous_step();
+			$form->previous_step();
 		}
 
 		// Continue = Take Payment
@@ -137,7 +139,7 @@ class WP_Job_Manager_Simple_Paid_Listings extends WPJM_Updater {
 
 			if ( $this->gateway->pay_for_listing( $this->job_id ) ) {
 				// If pay for listing returns true we can proceed, otherwise stay in preview mode
-				WP_Job_Manager_Form_Submit_Job::next_step();
+				$form->next_step();
 			}
 		}
 	}

@@ -17,17 +17,23 @@ class WP_Resume_Manager_CPT {
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
 		add_filter( 'manage_edit-resume_columns', array( $this, 'columns' ) );
 		add_action( 'manage_resume_posts_custom_column', array( $this, 'custom_columns' ), 2 );
+		add_filter( 'manage_edit-resume_sortable_columns', array( $this, 'sortable_columns' ) );
+		add_action( 'parse_query', array( $this, 'search_meta' ) );
+		add_filter( 'get_search_query', array( $this, 'search_meta_label' ) );
+		add_filter( 'request', array( $this, 'sort_columns' ) );
 		add_filter( 'post_updated_messages', array( $this, 'post_updated_messages' ) );
 		add_action( 'admin_footer-edit.php', array( $this, 'add_bulk_actions' ) );
 		add_action( 'load-edit.php', array( $this, 'do_bulk_actions' ) );
 		add_action( 'admin_init', array( $this, 'approve_resume' ) );
 		add_action( 'admin_notices', array( $this, 'approved_notice' ) );
 
-		if ( get_option( 'resume_manager_enable_categories' ) )
+		if ( get_option( 'resume_manager_enable_categories' ) ) {
 			add_action( "restrict_manage_posts", array( $this, "resumes_by_category" ) );
+		}
 
-		foreach ( array( 'post', 'post-new' ) as $hook )
+		foreach ( array( 'post', 'post-new' ) as $hook ) {
 			add_action( "admin_footer-{$hook}.php", array( $this,'extend_submitdiv_post_status' ) );
+		}
 	}
 
 	/**
@@ -129,8 +135,9 @@ class WP_Resume_Manager_CPT {
 	public function resumes_by_category( $show_counts = 1, $hierarchical = 1, $show_uncategorized = 1, $orderby = '' ) {
 		global $typenow, $wp_query;
 
-	    if ( $typenow != 'resume' || ! taxonomy_exists( 'resume_category' ) )
+	    if ( $typenow != 'resume' || ! taxonomy_exists( 'resume_category' ) ) {
 	    	return;
+	    }
 
 	    if ( file_exists( JOB_MANAGER_PLUGIN_DIR . '/includes/admin/class-wp-job-manager-category-walker.php' ) ) {
 			include_once( JOB_MANAGER_PLUGIN_DIR . '/includes/admin/class-wp-job-manager-category-walker.php' );
@@ -146,10 +153,11 @@ class WP_Resume_Manager_CPT {
 		$r['selected']     = isset( $wp_query->query['resume_category'] ) ? $wp_query->query['resume_category'] : '';
 		$r['menu_order']   = false;
 
-		if ( $orderby == 'order' )
+		if ( $orderby == 'order' ) {
 			$r['menu_order'] = 'asc';
-		elseif ( $orderby )
+		} elseif ( $orderby ) {
 			$r['orderby'] = $orderby;
+		}
 
 		$terms = get_terms( 'resume_category', $r );
 
@@ -174,32 +182,30 @@ class WP_Resume_Manager_CPT {
 		$args = func_get_args();
 
 		// the user's options are the third parameter
-		if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') )
+		if ( empty($args[2]['walker']) || !is_a($args[2]['walker'], 'Walker') ) {
 			$walker = new WP_Job_Manager_Category_Walker;
-		else
+		} else {
 			$walker = $args[2]['walker'];
+		}
 
 		return call_user_func_array( array( $walker, 'walk' ), $args );
 	}
 
 	/**
 	 * enter_title_here function.
-	 *
-	 * @access public
-	 * @return void
+	 * @return string
 	 */
 	public function enter_title_here( $text, $post ) {
-		if ( $post->post_type == 'resume' )
+		if ( $post->post_type == 'resume' ) {
 			return __( 'Candidate name', 'wp-job-manager-resumes' );
+		}
 		return $text;
 	}
 
 	/**
 	 * post_updated_messages function.
-	 *
-	 * @access public
-	 * @param mixed $messages
-	 * @return void
+	 * @param array $messages
+	 * @return array
 	 */
 	public function post_updated_messages( $messages ) {
 		global $post, $post_ID;
@@ -218,7 +224,6 @@ class WP_Resume_Manager_CPT {
 			  date_i18n( __( 'M j, Y @ G:i', 'wp-job-manager-resumes' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
 			10 => sprintf( __( 'Resume draft updated. <a target="_blank" href="%s">Preview Resume</a>', 'wp-job-manager-resumes' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 		);
-
 		return $messages;
 	}
 
@@ -230,14 +235,17 @@ class WP_Resume_Manager_CPT {
 	 * @return void
 	 */
 	public function columns( $columns ) {
-		if ( ! is_array( $columns ) )
+		if ( ! is_array( $columns ) ) {
 			$columns = array();
+		}
 
 		unset( $columns['title'], $columns['date'] );
 
 		$columns["candidate"]          = __( "Candidate", 'wp-job-manager-resumes' );
 		$columns["candidate_location"] = __( "Location", 'wp-job-manager-resumes' );
-		$columns["candidate_email"]    = __( "Email", 'wp-job-manager-resumes' );
+		$columns['resume_status']   = '<span class="tips" data-tip="' . __( "Status", 'wp-job-manager-resumes' ) . '">' . __( "Status", 'wp-job-manager-resumes' ) . '</span>';
+		$columns["resume_posted"]   = __( "Posted", 'wp-job-manager-resumes' );
+		$columns["resume_expires"]  = __( "Expires", 'wp-job-manager-resumes' );
 
 		if ( get_option( 'resume_manager_enable_skills' ) ) {
 			$columns["resume_skills"] = __( "Skills", 'wp-job-manager-resumes' );
@@ -248,20 +256,102 @@ class WP_Resume_Manager_CPT {
 		}
 
 		$columns['featured_resume'] = '<span class="tips" data-tip="' . __( "Featured?", 'wp-job-manager-resumes' ) . '">' . __( "Featured?", 'wp-job-manager-resumes' ) . '</span>';
-		$columns['resume_status']   = __( "Status", 'wp-job-manager-resumes' );
-		$columns["resume_posted"]   = __( "Posted", 'wp-job-manager-resumes' );
-		$columns["resume_expires"]  = __( "Expires", 'wp-job-manager-resumes' );
 		$columns['resume_actions']  = __( "Actions", 'wp-job-manager-resumes' );
 
 		return $columns;
 	}
 
 	/**
+	 * sortable_columns function.
+	 * @param array $columns
+	 * @return array
+	 */
+	public function sortable_columns( $columns ) {
+		$custom = array(
+			'resume_posted'      => 'date',
+			'candidate'          => 'title',
+			'candidate_location' => 'candidate_location',
+			'resume_expires'     => 'resume_expires'
+		);
+		return wp_parse_args( $custom, $columns );
+	}
+
+	/**
+	 * Search custom fields as well as content.
+	 * @param WP_Query $wp
+	 */
+	public function search_meta( $wp ) {
+		global $pagenow, $wpdb;
+
+		if ( 'edit.php' != $pagenow || empty( $wp->query_vars['s'] ) || $wp->query_vars['post_type'] != 'resume' ) {
+			return;
+		}
+
+		$post_ids = array_unique( array_merge(
+			$wpdb->get_col(
+				$wpdb->prepare( "
+					SELECT posts.ID
+					FROM {$wpdb->posts} posts
+					INNER JOIN {$wpdb->postmeta} p1 ON posts.ID = p1.post_id
+					WHERE p1.meta_value LIKE '%%%s%%'
+					OR posts.post_title LIKE '%%%s%%'
+					OR posts.post_content LIKE '%%%s%%'
+					AND posts.post_type = 'resume'
+					",
+					esc_attr( $wp->query_vars['s'] ),
+					esc_attr( $wp->query_vars['s'] ),
+					esc_attr( $wp->query_vars['s'] )
+				)
+			),
+			array( 0 )
+		) );
+
+		// Adjust the query vars
+		unset( $wp->query_vars['s'] );
+		$wp->query_vars['resume_search'] = true;
+		$wp->query_vars['post__in'] = $post_ids;
+	}
+
+	/**
+	 * Change the label when searching meta.
+	 * @param string $query
+	 * @return string
+	 */
+	public function search_meta_label( $query ) {
+		global $pagenow, $typenow;
+
+		if ( 'edit.php' != $pagenow || $typenow != 'resume' || ! get_query_var( 'resume_search' ) ) {
+			return $query;
+		}
+
+		return wp_unslash( sanitize_text_field( $_GET['s'] ) );
+	}
+
+	/**
+	 * sort_columns function.
+	 * @param array $vars
+	 * @return array
+	 */
+	public function sort_columns( $vars ) {
+		if ( isset( $vars['orderby'] ) ) {
+			if ( 'resume_expires' === $vars['orderby'] ) {
+				$vars = array_merge( $vars, array(
+					'meta_key' 	=> '_resume_expires',
+					'orderby' 	=> 'meta_value'
+				) );
+			} elseif ( 'candidate_location' === $vars['orderby'] ) {
+				$vars = array_merge( $vars, array(
+					'meta_key' 	=> '_candidate_location',
+					'orderby' 	=> 'meta_value'
+				) );
+			}
+		}
+		return $vars;
+	}
+
+	/**
 	 * custom_columns function.
-	 *
-	 * @access public
-	 * @param mixed $column
-	 * @return void
+	 * @param string $column
 	 */
 	public function custom_columns( $column ) {
 		global $post;
@@ -269,23 +359,13 @@ class WP_Resume_Manager_CPT {
 		switch ( $column ) {
 			case "candidate" :
 				echo '<a href="' . admin_url('post.php?post=' . $post->ID . '&action=edit') . '" class="tips candidate_name" data-tip="' . sprintf( __( 'Resume ID: %d', 'wp-job-manager-resumes' ), $post->ID ) . '">' . $post->post_title . '</a>';
-
 				echo '<div class="candidate_title">';
-
 				the_candidate_title();
-
 				echo '</div>';
-
 				the_candidate_photo();
 			break;
 			case 'candidate_location' :
 				the_candidate_location( true, $post );
-			break;
-			case 'candidate_email' :
-				if ( ! $email = get_post_meta( $post->ID, '_candidate_email', true ) )
-					echo '<span class="na">&ndash;</span>';
-				else
-					echo '<a class="candidate-email" href="mailto:' . esc_attr( $email ) . '">' . __( 'Contact', 'wp-job-manager-resumes' ) . '</a>';
 			break;
 			case "resume_skills" :
 				if ( ! $terms = get_the_term_list( $post->ID, 'resume_skill', '', ', ', '' ) ) echo '<span class="na">&ndash;</span>'; else echo $terms;
@@ -298,20 +378,22 @@ class WP_Resume_Manager_CPT {
 				echo ( empty( $post->post_author ) ? __( 'by a guest', 'wp-job-manager-resumes' ) : sprintf( __( 'by %s', 'wp-job-manager-resumes' ), '<a href="' . get_edit_user_link( $post->post_author ) . '">' . get_the_author() . '</a>' ) ) . '</span>';
 			break;
 			case "resume_expires" :
-				if ( $post->_resume_expires )
+				if ( $post->_resume_expires ) {
 					echo '<strong>' . date_i18n( __( 'M j, Y', 'wp-job-manager-resumes' ), strtotime( $post->_resume_expires ) ) . '</strong>';
-				else
+				} else {
 					echo '&ndash;';
+				}
 			break;
 			case "featured_resume" :
 				if ( is_resume_featured( $post ) ) echo '&#10004;'; else echo '&ndash;';
 			break;
 			case "resume_status" :
-				echo get_the_resume_status( $post );
+				echo '<span data-tip="' . esc_attr( get_the_resume_status( $post ) ) . '" class="tips status-' . esc_attr( $post->post_status ) . '">' . get_the_resume_status( $post ) . '</span>';
 			break;
 			case "resume_actions" :
 				echo '<div class="actions">';
 				$admin_actions           = array();
+
 				if ( $post->post_status == 'pending' ) {
 					$admin_actions['approve']   = array(
 						'action'  => 'approve',
@@ -319,12 +401,20 @@ class WP_Resume_Manager_CPT {
 						'url'     =>  wp_nonce_url( add_query_arg( 'approve_resume', $post->ID ), 'approve_resume' )
 					);
 				}
+
 				if ( $post->post_status !== 'trash' ) {
 					$admin_actions['view']   = array(
 						'action'  => 'view',
 						'name'    => __( 'View', 'wp-job-manager-resumes' ),
 						'url'     => get_permalink( $post->ID )
 					);
+					if ( $email = get_post_meta( $post->ID, '_candidate_email', true ) ) {
+						$admin_actions['email']   = array(
+							'action'  => 'email',
+							'name'    => __( 'Email Candidate', 'wp-job-manager-resumes' ),
+							'url'     =>  'mailto:' . esc_attr( $email )
+						);
+					}
 					$admin_actions['edit']   = array(
 						'action'  => 'edit',
 						'name'    => __( 'Edit', 'wp-job-manager-resumes' ),

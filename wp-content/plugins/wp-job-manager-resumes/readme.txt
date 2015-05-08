@@ -1,8 +1,8 @@
 === Resume Manager ===
 Contributors: mikejolley
 Requires at least: 3.8
-Tested up to: 4.1
-Stable tag: 1.10.2
+Tested up to: 4.2
+Stable tag: 1.11.2
 License: GNU General Public License v3.0
 
 Manage canidate resumes from the WordPress admin panel, and allow candidates to post their resumes directly to your site.
@@ -26,6 +26,27 @@ If you need help with customisation you will need to find and hire a developer c
 To install this plugin, please refer to the guide here: [http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation](http://codex.wordpress.org/Managing_Plugins#Manual_Plugin_Installation)
 
 == Changelog ==
+
+= 1.11.2 =
+* Fix - Prevent blank data being imported from LinkedIn.
+
+= 1.11.1 =
+* Fix - It's 2015, but some people are still running PHP 5.2. Compatibility fix.
+* Tweak - Better checking to see if JM exists.
+
+= 1.11.0 =
+* Feature - Backend sorting of repeated rows.
+* Feature - Backend search meta data when searching resumes.
+* Feature - Added separate option to enable apply with resume for URL based jobs (when also using applications).
+* Tweak - Added candidate-dashboard-login.php file for logged out users.
+* Tweak - Refactored form classes to be instance based rather than static. Reduction in code base. Requires Job Manager 1.22.0.
+* Tweak - Improved handling and filters for repeated fields (links, edu, exp).
+* Tweak - Improved admin columns display.
+* Tweak - Cursor:move for frontend repeated fields.
+
+= 1.10.3 =
+* Fix widget class check.
+* Fix skill count check.
 
 = 1.10.2 =
 * Fix - Typo in upload method.

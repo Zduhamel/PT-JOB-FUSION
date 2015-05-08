@@ -31,7 +31,7 @@ wp_enqueue_script( 'wp-resume-manager-resume-submission' );
 			<fieldset class="fieldset-<?php esc_attr_e( $key ); ?>">
 				<label for="<?php esc_attr_e( $key ); ?>"><?php echo $field['label'] . apply_filters( 'submit_resume_form_required_label', $field['required'] ? '' : ' <small>' . __( '(optional)', 'wp-job-manager-resumes' ) . '</small>', $field ); ?></label>
 				<div class="field">
-					<?php call_user_func( $class . "::get_field_template", $key, $field ); ?>
+					<?php $class->get_field_template( $key, $field ); ?>
 				</div>
 			</fieldset>
 		<?php endforeach; ?>

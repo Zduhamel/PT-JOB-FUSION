@@ -3,7 +3,7 @@
 Plugin Name: WP Job Manager - Applications
 Plugin URI: https://wpjobmanager.com/add-ons/applications/
 Description: Lets candidates submit applications to jobs which are stored on the employers jobs page, rather than simply emailed. Works standalone with it's built in application form.
-Version: 1.7.3
+Version: 2.0.5
 Author: Mike Jolley
 Author URI: http://mikejolley.com
 Requires at least: 3.8
@@ -32,11 +32,19 @@ class WP_Job_Manager_Applications extends WPJM_Updater {
 	 * __construct function.
 	 */
 	public function __construct() {
-
 		// Define constants
-		define( 'JOB_MANAGER_APPLICATIONS_VERSION', '1.7.3' );
+		define( 'JOB_MANAGER_APPLICATIONS_VERSION', '2.0.5' );
+		define( 'JOB_MANAGER_APPLICATIONS_FILE', __FILE__ );
 		define( 'JOB_MANAGER_APPLICATIONS_PLUGIN_DIR', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 		define( 'JOB_MANAGER_APPLICATIONS_PLUGIN_URL', untrailingslashit( plugins_url( basename( plugin_dir_path( __FILE__ ) ), basename( __FILE__ ) ) ) );
+
+		// Check requirements
+		if ( version_compare( phpversion(), '5.3', '<' ) ) {
+			if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+				add_action( 'admin_notices', array( $this, 'php_admin_notice' ) );
+			}
+			return;
+		}
 
 		// Includes
 		include( 'includes/class-wp-job-manager-applications-post-types.php' );
@@ -49,11 +57,9 @@ class WP_Job_Manager_Applications extends WPJM_Updater {
 		$this->post_types = new WP_Job_Manager_Applications_Post_Types();
 
 		// Add actions
-		add_action( 'admin_notices', array( $this, 'version_check' ) );
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ), 12 );
 		add_action( 'plugins_loaded', array( $this, 'integration' ), 12 );
-		add_action( 'admin_init', array( $this, 'load_admin' ), 12 );
-		add_filter( 'job_manager_settings', array( $this, 'settings' ) );
+		add_action( 'init', array( $this, 'load_admin' ), 12 );
 		add_action( 'after_setup_theme', array( $this, 'template_functions' ) );
 		add_action( 'admin_init', array( $this, 'updater' ) );
 
@@ -65,14 +71,12 @@ class WP_Job_Manager_Applications extends WPJM_Updater {
 	}
 
 	/**
-	 * Check JM version
+	 * Output a notice when using an old non-supported version of PHP
 	 */
-	public function version_check() {
-		if ( version_compare( '1.14.0', JOB_MANAGER_VERSION, '>' ) ) {
-			?>
-			<div class="error"><p><?php printf( __( 'Applications requies WP Job Manager 1.14.0 and above; you are using %s', 'wp-job-manager-applications' ), JOB_MANAGER_VERSION ); ?></p></div>
-			<?php
-		}
+	public function php_admin_notice() {
+		echo '<div class="error">';
+		echo '<p>Unfortunately, WP Job Manager Applications can not run on PHP versions older than 5.3. Read more information about <a href="http://www.wpupdatephp.com/update/">how you can update</a>.</p>';
+		echo '</div>';
 	}
 
 	/**
@@ -110,6 +114,9 @@ class WP_Job_Manager_Applications extends WPJM_Updater {
 				}
 			}
 		}
+
+		wp_clear_scheduled_hook( 'job_applications_purge' );
+		wp_schedule_event( time(), 'daily', 'job_applications_purge' );
 
 		update_option( 'wp_job_manager_applications_version', JOB_MANAGER_APPLICATIONS_VERSION );
 	}
@@ -171,64 +178,9 @@ class WP_Job_Manager_Applications extends WPJM_Updater {
 	 * Init the admin area
 	 */
 	public function load_admin() {
-		include_once( 'includes/class-wp-job-manager-applications-admin.php' );
-	}
-
-	/**
-	 * Add Settings
-	 * @param  array $settings
-	 * @return array
-	 */
-	public function settings( $settings = array() ) {
-		$settings['job_applications'] = array(
-			__( 'Job Application', 'wp-job-manager-applications' ),
-			apply_filters(
-				'wp_job_manager_applications_settings',
-				array(
-					array(
-						'name' 		=> 'job_application_form_for_email_method',
-						'std' 		=> '1',
-						'label' 	=> __( 'Email Application method', 'wp-job-manager-applications' ),
-						'cb_label' 	=> __( 'Use application form', 'wp-job-manager-applications' ),
-						'desc'		=> __( 'Show application form for jobs with an email application method. Disable to use the default application functionality, or another form plugin.', 'wp-job-manager-applications' ),
-						'type'      => 'checkbox'
-					),
-					array(
-						'name' 		=> 'job_application_form_for_url_method',
-						'std' 		=> '1',
-						'label' 	=> __( 'Website URL Application method', 'wp-job-manager-applications' ),
-						'cb_label' 	=> __( 'Use application form', 'wp-job-manager-applications' ),
-						'desc'		=> __( 'Show application form for jobs with a website url application method. Disable to use the default application functionality, or another form plugin.', 'wp-job-manager-applications' ),
-						'type'      => 'checkbox'
-					),
-					array(
-						'name' 		=> 'job_application_form_require_login',
-						'std' 		=> '0',
-						'label' 	=> __( 'User restriction', 'wp-job-manager-applications' ),
-						'cb_label' 	=> __( 'Only allow registered users to apply', 'wp-job-manager-applications' ),
-						'desc'		=> __( 'If enabled, only logged in users can apply. Non-logged in users will see the contents of the <code>application-form-login.php</code> file instead of a form.', 'wp-job-manager-applications' ),
-						'type'      => 'checkbox'
-					),
-					array(
-						'name' 		=> 'job_application_prevent_multiple_applications',
-						'std' 		=> '0',
-						'label' 	=> __( 'Multiple Applications', 'wp-job-manager-applications' ),
-						'cb_label' 	=> __( 'Prevent users from applying to the same job multiple times', 'wp-job-manager-applications' ),
-						'desc'		=> __( 'If enabled, the apply form will be hidden after applying.', 'wp-job-manager-applications' ),
-						'type'      => 'checkbox'
-					),
-					array(
-						'name' 		=> 'job_application_delete_with_job',
-						'std' 		=> '0',
-						'label' 	=> __( 'Delete applications', 'wp-job-manager-applications' ),
-						'cb_label' 	=> __( 'Delete applications when a job is deleted', 'wp-job-manager-applications' ),
-						'desc'		=> __( 'If enabled, job applications will be deleted when the parent job listing is deleted. Otherwise they will be kept on file and visible in the backend.', 'wp-job-manager-applications' ),
-						'type'      => 'checkbox'
-					)
-				)
-			)
-		);
-		return $settings;
+		if ( is_admin() && class_exists( 'WP_Job_Manager' ) ) {
+			include_once( 'includes/class-wp-job-manager-applications-admin.php' );
+		}
 	}
 }
 

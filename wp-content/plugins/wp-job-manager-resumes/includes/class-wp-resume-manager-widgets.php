@@ -1,6 +1,12 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! class_exists( 'WP_Job_Manager_Widget' ) ) {
+	return;
+}
 
 /**
  * Recent Resumes Widget

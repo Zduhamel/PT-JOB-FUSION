@@ -146,76 +146,64 @@
                 $(this).parent().parent().addClass('details selected');
         });
 
-        // Load more images into the library view.
-        $(document).on('click', '.soliloquy-load-library', function(e){
-            e.preventDefault();
-            var $this = $(this);
-            $this.next().css({'display' : 'inline-block', 'margin-top' : '14px', 'margin-left' : '-5px'});
+        // Load more images into the library view when the 'Load More Images from Library'
+        // button is pressed
+        $(document).on('click', 'a.soliloquy-load-library', function(e){
+            soliloquyLoadLibraryImages( $('a.soliloquy-load-library').attr('data-soliloquy-offset') );
+        });
 
-            // Prepare our data to be sent via Ajax.
-            var load = {
-                action:  'soliloquy_load_library',
-                offset:  parseInt($this.attr('data-soliloquy-offset')),
-                post_id: soliloquy_metabox.id,
-                nonce:   soliloquy_metabox.load_slider
-            };
+        // Load more images into the library view when the user scrolls to the bottom of the view
+        // Honours any search term(s) specified
+        $('.soliloquy-slider').bind('scroll', function() {
+            if( $(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight ) {
+                soliloquyLoadLibraryImages( $('a.soliloquy-load-library').attr('data-soliloquy-offset') );
+            }
+        });
 
-            // Process the Ajax response and output all the necessary data.
+        // Load images when the search term changes
+        $(document).on('keyup keydown', '#soliloquy-slider-search', function() {
+            delay(function() {
+                soliloquyLoadLibraryImages( 0 );
+            }); 
+        });
+
+        /**
+        * Makes an AJAX call to get the next batch of images
+        */
+        function soliloquyLoadLibraryImages( offset ) {
+            // Show spinner
+            $('.media-toolbar-secondary span.soliloquy-spinner').css('visibility','visible');
+
+            // AJAX call to get next batch of images
             $.post(
                 soliloquy_metabox.ajax,
-                load,
+                {
+                    action:  'soliloquy_load_library',
+                    offset:  offset,
+                    post_id: soliloquy_metabox.id,
+                    search:  $('input#soliloquy-slider-search').val(),
+                    nonce:   soliloquy_metabox.load_slider
+                },
                 function(response) {
-                    $this.attr('data-soliloquy-offset', parseInt($this.attr('data-soliloquy-offset')) + 20);
+                    // Update offset
+                    $('a.soliloquy-load-library').attr('data-soliloquy-offset', ( Number(offset) + 20 ) );
+
+                    // Hide spinner
+                    $('.media-toolbar-secondary span.soliloquy-spinner').css('visibility','hidden');
 
                     // Append the response data.
-                    if ( response && response.html && $this.hasClass('has-search') ) {
-                        $('.soliloquy-slider').html(response.html);
-                        $this.removeClass('has-search');
+                    if ( offset === 0 ) {
+                        // New search, so replace results
+                        $('.soliloquy-slider').html( response.html );    
                     } else {
-                        $('.soliloquy-slider').append(response.html);
+                        // Append to end of results
+                        $('.soliloquy-slider').append( response.html );
                     }
-
-                    // Remove the spinner.
-                    $this.next().hide();
+                    
                 },
                 'json'
             );
-        });
-
-        // Load images related to the search term specified
-        $(document).on('keyup keydown', '#soliloquy-slider-search', function(){
-            var $this = $(this);
-            $this.prev().css({'display' : 'inline-block', 'margin-top' : '1px', 'vertical-align' : 'middle', 'margin-right' : '4px'});
-
-            var text     = $(this).val();
-            var search   = {
-                action:  'soliloquy_library_search',
-                nonce:   soliloquy_metabox.library_search,
-                post_id: soliloquy_metabox.id,
-                search:  text
-            };
-
-            // Send the ajax request with a delay (500ms after the user stops typing).
-            delay(function() {
-                // Process the Ajax response and output all the necessary data.
-                $.post(
-                    soliloquy_metabox.ajax,
-                    search,
-                    function(response) {
-                        // Notify the load button that we have entered a search and reset the offset counter.
-                        $('.soliloquy-load-library').addClass('has-search').attr('data-soliloquy-offset', parseInt(0));
-
-                        // Append the response data.
-                        if ( response )
-                            $('.soliloquy-slider').html(response.html);
-
-                        // Remove the spinner.
-                        $this.prev().hide();
-                    },
-                    'json'
-                );
-            }, '500');
-        });
+        }
 
         // Process inserting slides into slider when the Insert button is pressed.
         $(document).on('click', '.soliloquy-media-insert', function(e){

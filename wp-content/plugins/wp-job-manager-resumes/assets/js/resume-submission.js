@@ -107,9 +107,11 @@ jQuery(document).ready(function($) {
 				});
 
 				$( profile.memberUrlResources.values ).each( function( i, e ) {
-					$( '.fieldset-links' ).find( '.resume-manager-add-row' ).click();
-					$( '.fieldset-links' ).find( 'input[name^="link_name"]' ).last().val( e.name );
-					$( '.fieldset-links' ).find( 'input[name^="link_url"]' ).last().val( e.url );
+					if ( e.name && e.url ) {
+						$( '.fieldset-links' ).find( '.resume-manager-add-row' ).click();
+						$( '.fieldset-links' ).find( 'input[name^="link_name"]' ).last().val( e.name );
+						$( '.fieldset-links' ).find( 'input[name^="link_url"]' ).last().val( e.url );
+					}
 				});
 
 				$( profile.educations.values ).each( function( i, e ) {
